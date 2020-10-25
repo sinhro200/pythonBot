@@ -158,11 +158,15 @@ for event in longpoll.listen():
                 )
 
             if "иду" in str(event):
-                 pivniye.append(str(event.message.from_id))
+                 if str(event.message.from_id) not in pivniye:
+                    pivniye.append(str(event.message.from_id))
+                     message = "Принял"
+                 else:
+                     message= "Я уже понял"
                  vk.messages.send(
                      random_id=random_id,
                      chat_id=chat_id,
-                     message="Принял",
+                     message=message,
                  )
             if "кто идет" in str(event):
                 message = "Идут пить пиво :" + getPivniye()
