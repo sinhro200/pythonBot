@@ -34,26 +34,26 @@ def getName (id):
     print(first_name)
     print(last_name)
     return  first_name +" "+ last_name
-def getAll():
+def getAll(chat_id):
     message="Призываю вас:\n"
-    for person in pivniye:
+    for person in chats[chat_id].pivniye:
         message+=getLink(person)
     return  message
 def getLink(id):
     id=str(id)
     return "[id"+id+"|"+getName(id)+"] \n"
-def getPivniye():
+def getPivniye(chat_id):
     ids="\n"
-    ids_set = set(pivniye)
+    ids_set = set(chats[chat_id].pivniye)
     for id in ids_set:
         ids+=getName(id)
     return ids
-def getPollInfo():
+def getPollInfo(chat_id):
     info="\n"
-    for time in poll.keys() :
+    for time in chats[chat_id].poll.keys() :
             print(time)
             info +=time +"\n"
-            for id in poll.get(time):
+            for id in chats[chat_id].poll.get(time):
                 info+=getName(id)
     return info
 def whoIs(message,members):
@@ -67,13 +67,13 @@ def whoIs(message,members):
 
 def addPollValue(value,id):
     ids=[]
-    if value in poll.keys():
-        ids=poll.get(value)
+    if value in chats[chat_id].poll.keys():
+        ids=chats[chat_id].poll.get(value)
         if id in ids:
             return
     ids.append(id);
-    poll.update({value:ids})
-def createPollMessage(time_from,time_to):
+    chats[chat_id].poll.update({value:ids})
+def createPollMessage(time_from,time_to,chat_id):
     i = time_from
     poll_data="Варианты времени:\n"
     time_data=""
@@ -82,7 +82,7 @@ def createPollMessage(time_from,time_to):
             time_data=str(int(i))+":30"
         else:
             time_data=str(int(i))+":00"
-        time_values.append(time_data)
+        chats[chat_id].time_values.append(time_data)
         poll_data+=time_data+"\n"
         i+=0.5
     return poll_data
@@ -128,23 +128,32 @@ group_id="199735512"
 # Работа с сообщениями
 longpoll = VkBotLongPoll(vk_session,group_id)
 vk = vk_session.get_api()
+class Chat:
+    def __init__(self):
+        self.pivniye=[]
+        self.poll_created = 0
+        self.poll = {};
+        self.time_values = []
+        pass
 
-pivniye = []
-poll_created= 0
-poll= {};
-time_values=[]
+chats={}
 # Основной цикл
 for event in longpoll.listen():
     for event in longpoll.listen():
         if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and "пивобот " in str(event):
             random_id = random.randrange(10000,90000)
             chat_id = int(event.chat_id)
+            print("chat "+str(event.chat_id))
+            if chat_id not in chats.keys():
+                chat = Chat()
+                chats.update({chat_id: chat})
             print(event.message)
+            print(chats.values())
             if "пиво попито" in str(event):
-                pivniye = []
-                poll_created = 0
-                poll = {};
-                time_values = []
+                chats[chat_id].pivniye = []
+                chats[chat_id].poll_created = 0
+                chats[chat_id].poll = {}
+                chats[chat_id].time_values = []
                 vk.messages.send(
                     random_id=random_id,
                     chat_id=chat_id,
@@ -154,12 +163,12 @@ for event in longpoll.listen():
                 vk.messages.send(
                     random_id=random_id,
                     chat_id=chat_id,
-                    message=getAll(),
+                    message=getAll(chat_id),
                 )
 
             if "иду" in str(event):
-                 if str(event.message.from_id) not in pivniye:
-                     pivniye.append(str(event.message.from_id))
+                 if str(event.message.from_id) not in chats[chat_id].pivniye:
+                     chats[chat_id].pivniye.append(str(event.message.from_id))
                      message = "Принял"
                  else:
                      message= "Я уже понял"
@@ -169,7 +178,7 @@ for event in longpoll.listen():
                      message=message,
                  )
             if "кто идет" in str(event):
-                message = "Идут пить пиво :" + getPivniye()
+                message = "Идут пить пиво :" + getPivniye(chat_id)
                 vk.messages.send(
                     random_id=random_id,
                     chat_id=chat_id,
@@ -200,38 +209,38 @@ for event in longpoll.listen():
                     poll_created=1
                 except BaseException  :
                     poll_message= "Неверно задано время"
-                print(time_values)
+                print(chats[chat_id].time_values)
                 vk.messages.send(
                   random_id=random_id,
                   chat_id=chat_id,
                   message=poll_message,
                 )
             if "я за" in str(event):
-                if not poll_created :
+                if not chats[chat_id].poll_created :
                     message = "Нет опроса"
                 else:
                     time="empty"
                     try:
                         time= str(event.message.text).split("я за ")[1]
                         print(time)
-                        if not time in time_values:
+                        if not time in chats[chat_id].time_values:
                             message = "Время не в диапазоне соси"
                         else:
                             addPollValue(time,event.message.from_id)
                             message = "Принял"
                     except BaseException  :
                         message= "Неверно задано время"
-                print(poll)
+                print(chats[chat_id].poll)
                 vk.messages.send(
                     random_id=random_id,
                     chat_id=chat_id,
                     message=message,
                 )
             if "время инфо" in str(event):
-                if not poll_created :
+                if not chats[chat_id].poll_created :
                     message = "Нет опроса"
                 else:
-                    message=getPollInfo()
+                    message=getPollInfo(chat_id)
                 vk.messages.send(
                     random_id=random_id,
                     chat_id=chat_id,
