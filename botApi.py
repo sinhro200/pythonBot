@@ -72,7 +72,7 @@ def getPollInfo(chat_id):
 
 def whoIs(message, members):
     index = random.randrange(0, len(members) - 1)
-    while members[index]["member_id"]<0 :
+    while members[index]["member_id"] < 0:
         index = random.randrange(0, len(members) - 1)
     return "Очевидно что " + message + " " + getName(members[index]["member_id"])
 
@@ -157,7 +157,8 @@ chats = {}
 # Основной цикл
 for event in longpoll.listen():
     for event in longpoll.listen():
-        if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and "пивобот " in str(event):
+        if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and (
+                "пивобот " in str(event) or "Пивобот " in str(event)):
             random_id = random.randrange(10000, 90000)
             chat_id = int(event.chat_id)
             print("chat " + str(event.chat_id))
@@ -204,8 +205,8 @@ for event in longpoll.listen():
                 continue
             if "кто" in str(event):
                 members = \
-                vk.messages.getConversationMembers(peer_id=2000000000 + event.chat_id, v=5.124, group_id=group_id)[
-                    "items"]
+                    vk.messages.getConversationMembers(peer_id=2000000000 + event.chat_id, v=5.124, group_id=group_id)[
+                        "items"]
                 message = whoIs(event.message.text[11:], members)
                 vk.messages.send(
                     random_id=random_id,
