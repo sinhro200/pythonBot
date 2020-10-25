@@ -57,7 +57,7 @@ def getPollInfo(chat_id):
                 info+=getName(id)
     return info
 def whoIs(message,members):
-    index = random.randrange(0,len(members))
+    index = random.randrange(0,len(members)-1)
     if str(members[index]["member_id"]) == "-"+group_id:
         if index == 0:
             index+=1
