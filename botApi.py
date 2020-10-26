@@ -4,6 +4,7 @@ import requests
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
+from test import *
 
 
 def uploadImages(images, offset, vk_session):
@@ -344,7 +345,8 @@ for event in longpoll.listen():
                           "пивобот кто идет - посмотреть кто готов идти пить пиво \n" \
                           "пивобот опрос время #время_от #время_до - опрос по времени в интервале, разница не более 4 часов \n " \
                           "пивобот опрос показать - выводит опрос\n "\
-                          "пивобот скидка #[пятерочка/магнит/кб] - показать акции данного магазина\n" \
+                          "пивобот скидкаонлайн #[пятерочка/магнит/кб] - акции магазина со skidkaonline\n" \
+                          "пивобот едадил #[пятерочка/магнит/кб] - акции магазина с едадила\n" \
                           "пивобот время инфо - показать результаты опроса по времени\n" \
                           "пивобот лучшее пиво - показать лучшее пиво во вселенной\n" \
                           "пивобот кто #текст - ну вы поняли\n" \
@@ -355,7 +357,33 @@ for event in longpoll.listen():
                     chat_id=chat_id,
                     message=message,
                 )
-            if "скидка" in str(event):
+            if "едадил" in str(event):
+                message = ''
+                if ("пятерочка" in str(event)):
+                    products = edadeal_parser("5ka")
+                    message = "Скидки в пятерочке: \n"
+                elif ("магнит" in str(event)):
+                    products = edadeal_parser("magnit-univer")
+                    message = "Скидки в магните: \n "
+                elif ("кб" in str(event)):
+                    products = edadeal_parser("krasnoeibeloe")
+                    message = "Скидки в кб: \n"
+                else:
+                    vk.messages.send(
+                        random_id=random_id,
+                        chat_id=chat_id,
+                        message="Не знаю такого магазина",
+                    )
+                    continue
+                for product in products:
+                        message += product['description'] + " \n " + product['priceNew'] + "\n "
+                vk.messages.send(
+                        random_id=random_id,
+                        chat_id=chat_id,
+                        message=message,
+                    )
+
+            if "скидкаонлайн" in str(event):
                 message = ''
                 if ("пятерочка" in str(event)):
                     images = parsePyaterochka()
