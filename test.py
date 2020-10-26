@@ -1,8 +1,10 @@
 import bs4
 from selenium import webdriver
-
+import os
 
 def edadeal_parser():
+    GOOGLE_CHROME_BIN=os.environ.get('GOOGLE_CHROME_BIN')
+    CHROMEDRIVER_PATH=os.environ.get('CHROMEDRIVER_PATH')
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument('--no-sandbox')
