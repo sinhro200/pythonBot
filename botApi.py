@@ -10,7 +10,7 @@ from test import *
 def uploadImages(images, offset, vk_session):
     session = requests.Session()
     attachments = []
-    i = 0;
+    i = 0
     upload = vk_api.VkUpload(vk_session)
     while (i < 10 and i + offset < len(images)):
         image_url = images[i + offset]
@@ -87,7 +87,7 @@ def addPollValue(value, id):
         ids = chats[chat_id].poll.get(value)
         if id in ids:
             return
-    ids.append(id);
+    ids.append(id)
     chats[chat_id].poll.update({value: ids})
 
 
@@ -340,17 +340,16 @@ for event in longpoll.listen():
                     message="Конечно же ипа",
                 )
             if "команды" in str(event):
-                message = "Команды бота: \n " \
-                          "пивобот иду - готов идти пить пиво \n  " \
-                          "пивобот кто идет - посмотреть кто готов идти пить пиво \n" \
-                          "пивобот опрос время #время_от #время_до - опрос по времени в интервале, разница не более 4 часов \n " \
-                          "пивобот опрос показать - выводит опрос\n "\
-                          "пивобот скидкаонлайн #[пятерочка/магнит/кб] - акции магазина со skidkaonline\n" \
-                          "пивобот едадил #[пятерочка/магнит/кб] - акции магазина с едадила\n" \
-                          "пивобот время инфо - показать результаты опроса по времени\n" \
-                          "пивобот лучшее пиво - показать лучшее пиво во вселенной\n" \
-                          "пивобот кто #текст - ну вы поняли\n" \
-
+                message = """Команды бота: \n
+                          пивобот иду - готов идти пить пиво \n
+                          пивобот кто идет - посмотреть кто готов идти пить пиво \n
+                          пивобот опрос время #время_от #время_до - опрос по времени в интервале, разница не более 4 часов\n 
+                          пивобот опрос показать - выводит опрос\n
+                          пивобот скидкаонлайн #[пятерочка/магнит/кб] - акции магазина со skidkaonline\n
+                          пивобот едадил #[пятерочка/магнит/кб] - акции магазина с едадила\n
+                          пивобот время инфо - показать результаты опроса по времени\n
+                          пивобот лучшее пиво - показать лучшее пиво во вселенной\n
+                          пивобот кто #текст - ну вы поняли\n"""
 
                 vk.messages.send(
                     random_id=random_id,
@@ -376,22 +375,22 @@ for event in longpoll.listen():
                     )
                     continue
                 for product in products:
-                        message += product['description'] + " \n " + product['priceNew'] + "\n "
+                    message += product['description'] + " \n " + product['priceNew'] + "\n "
                 vk.messages.send(
-                        random_id=random_id,
-                        chat_id=chat_id,
-                        message=message,
-                    )
+                    random_id=random_id,
+                    chat_id=chat_id,
+                    message=message,
+                )
 
             if "скидкаонлайн" in str(event):
                 message = ''
-                if ("пятерочка" in str(event)):
+                if "пятерочка" in str(event):
                     images = parsePyaterochka()
                     message = "Скидки в пятерочке"
-                elif ("магнит" in str(event)):
+                elif "магнит" in str(event):
                     images = parseMagnit()
                     message = "Скидки в магните "
-                elif ("кб" in str(event)):
+                elif "кб" in str(event):
                     products = parseKb()
                     message = "Скидки в кб: \n"
                     for product in products.keys():
@@ -410,7 +409,7 @@ for event in longpoll.listen():
                     )
                     continue
                 length = len(images)
-                i = 0;
+                i = 0
                 while True:
                     attachments = uploadImages(images, i, vk)
                     vk.messages.send(
@@ -420,5 +419,5 @@ for event in longpoll.listen():
                         attachment=','.join(attachments)
                     )
                     i += 10
-                    if (i > length):
+                    if i > length:
                         break
