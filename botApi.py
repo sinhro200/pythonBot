@@ -283,12 +283,7 @@ for event in longpoll.listen():
                     message=message,
                 )
             if "кто идет" in str(event):
-                message = "Идут пить пиво :" + getPivniye(chat_id)
-                vk.messages.send(
-                    random_id=random_id,
-                    chat_id=chat_id,
-                    message=message,
-                )
+                getPivoDrinkers()
                 continue
             if "кто" in str(event):
                 members = \
@@ -325,15 +320,8 @@ for event in longpoll.listen():
                 )
 
             if "время инфо" in str(event):
-                if not chats[chat_id].poll_created:
-                    message = "Нет опроса"
-                else:
-                    message = getPollInfo(chat_id)
-                vk.messages.send(
-                    random_id=random_id,
-                    chat_id=chat_id,
-                    message=message,
-                )
+                showVoteInfoInDetails()
+                continue
             if "лучшее пиво" in str(event):
                 vk.messages.send(
                     random_id=random_id,
@@ -359,13 +347,13 @@ for event in longpoll.listen():
                 )
             if "едадил" in str(event):
                 message = ''
-                if ("пятерочка" in str(event)):
+                if "пятерочка" in str(event):
                     products = edadeal_parser("5ka")
                     message = "Скидки в пятерочке: \n"
-                elif ("магнит" in str(event)):
+                elif "магнит" in str(event):
                     products = edadeal_parser("magnit-univer")
                     message = "Скидки в магните: \n "
-                elif ("кб" in str(event)):
+                elif "кб" in str(event):
                     products = edadeal_parser("krasnoeibeloe")
                     message = "Скидки в кб: \n"
                 else:
