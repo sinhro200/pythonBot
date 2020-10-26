@@ -27,8 +27,7 @@ def edadeal_parser():
               "quantity": a.find("div", {"class": "b-offer__quantity"}).get_text(),
              "priceNew": a.find("div", {"class": "b-offer__price-new"}).get_text(),
              "priceOld": a.find("div", {"class": "b-offer__price-old"}).get_text(),
-              "discount": a.find("div", {"class": "b-offer__badge"}).get_text(),
-              "market": a.find("div", {"class": "b-offer__dates"}).children.,
+              "discount": a.find("div", {"class": "b-offer__badge"}).get_text()
          }
          result.append(a.text)
     for elem in result:
