@@ -91,8 +91,8 @@ def createPollMessage(time_from, time_to, chat_id):
     i = time_from
     poll_data = "Варианты времени:\n"
     time_data = ""
-    while (i <= time_to):
-        if (int(i) != i):
+    while i <= time_to:
+        if int(i) != i:
             time_data = str(int(i)) + ":30"
         else:
             time_data = str(int(i)) + ":00"
@@ -213,11 +213,12 @@ for event in longpoll.listen():
                     chat_id=chat_id,
                     message=message,
                 )
-            if "опрос время" in str(event):
+            if 'опрос время' in str(event):
                 time = "empty"
                 try:
                     times = str(event.message.text).split("опрос время ")[1]
                     times = times.split(" ")
+                    print(times)
                     if int(times[0]) > int(times[1]):
                         vk.messages.send(
                             random_id=random_id,
@@ -225,7 +226,7 @@ for event in longpoll.listen():
                             message="Ты че дурак чтоли а",
                         )
                         continue
-                    poll_message = createPollMessage(int(times[0]), int(times[1]))
+                    poll_message = createPollMessage(int(times[0]), int(times[1]), chat_id)
                     poll_created = 1
                 except BaseException:
                     poll_message = "Неверно задано время"
@@ -282,7 +283,7 @@ for event in longpoll.listen():
                           "пивобот время инфо - показать результаты опроса по времени\n" \
                           "пивобот лучшее пиво - показать лучшее пиво во вселенной\n" \
                           "пивобот кто #текст - ну вы поняли\n" \
-
+ 
                 vk.messages.send(
                     random_id=random_id,
                     chat_id=chat_id,
