@@ -1,4 +1,3 @@
-import json
 import random
 import requests
 import vk_api
@@ -14,7 +13,7 @@ def uploadImages(images, offset, vk_session):
     attachments = []
     i = 0
     upload = vk_api.VkUpload(vk_session)
-    while (i < 10 and i + offset < len(images)):
+    while i < 10 and i + offset < len(images):
         image_url = images[i + offset]
         image = session.get(image_url, stream=True)
         photo = upload.photo_messages(photos=image.raw)[0]
@@ -147,60 +146,101 @@ class Chat:
 
 
 chats = {}
+
+
+def showPoll():
+    if not chats[chat_id].poll_created:
+        vk.messages.send(
+            random_id=random_id,
+            chat_id=chat_id,
+            message="Нет опроса")
+        # continue
+    else:
+        vk.messages.send(
+            random_id=random_id,
+            chat_id=chat_id,
+            message="Текущий опрос",
+            keyboard=keyboard.get_keyboard()
+        )
+
+
+def showVoteInfoInDetails():
+    message: str
+    if not chats[chat_id].poll_created:
+        message = "Нет опроса"
+    else:
+        message = getPollInfo(chat_id)
+    vk.messages.send(
+        random_id=random_id,
+        chat_id=chat_id,
+        message=message,
+    )
+
+
+def handleCheckIn():
+    global message
+    if str(event.message.from_id) not in chats[chat_id].pivniye:
+        chats[chat_id].pivniye.append(str(event.message.from_id))
+        message = "Принял"
+    else:
+        message = "Я уже понял"
+    vk.messages.send(
+        random_id=random_id,
+        chat_id=chat_id,
+        message=message,
+    )
+
+
+def getPivoDrinkers():
+    message = "Идут пить пиво :" + getPivniye(chat_id)
+    vk.messages.send(
+        random_id=random_id,
+        chat_id=chat_id,
+        message=message,
+    )
+
+
+def handleVote():
+    if not chats[chat_id].poll_created:
+        message = "Нет опроса"
+    else:
+        time = "empty"
+        try:
+            time = str(event.message.text[33:])
+            print(time)
+            if time not in chats[chat_id].time_values:
+                message = "Время не в диапазоне соси"
+            else:
+                addPollValue(time, event.message.from_id)
+                message = "Принял"
+        except BaseException:
+            message = "Неверно задано время"
+    print(chats[chat_id].poll)
+    vk.messages.send(
+        random_id=random_id,
+        chat_id=chat_id,
+        message=message,
+    )
+
+
 # Основной цикл
+# FIXME [ZK]: пивобот does not follows exact order of commands
 for event in longpoll.listen():
     for event in longpoll.listen():
         if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and ("@public" + group_id) in str(event):
             if str(event.message.text[33:]) in chats[chat_id].time_values:
-                if not chats[chat_id].poll_created:
-                    message = "Нет опроса"
-                else:
-                    time = "empty"
-                    try:
-                        time = str(event.message.text[33:])
-                        print(time)
-                        if not time in chats[chat_id].time_values:
-                            message = "Время не в диапазоне соси"
-                        else:
-                            addPollValue(time, event.message.from_id)
-                            message = "Принял"
-                    except BaseException:
-                        message = "Неверно задано время"
-                print(chats[chat_id].poll)
-                vk.messages.send(
-                    random_id=random_id,
-                    chat_id=chat_id,
-                    message=message,
-                )
-            if "время инфо" in str(event):
-                if not chats[chat_id].poll_created:
-                    message = "Нет опроса"
-                else:
-                    message = getPollInfo(chat_id)
-                vk.messages.send(
-                    random_id=random_id,
-                    chat_id=chat_id,
-                    message=message,
-                )
-            if "иду" in str(event):
-                if str(event.message.from_id) not in chats[chat_id].pivniye:
-                    chats[chat_id].pivniye.append(str(event.message.from_id))
-                    message = "Принял"
-                else:
-                    message = "Я уже понял"
-                vk.messages.send(
-                    random_id=random_id,
-                    chat_id=chat_id,
-                    message=message,
-                )
-            if "кто идет" in str(event):
-                message = "Идут пить пиво :" + getPivniye(chat_id)
-                vk.messages.send(
-                    random_id=random_id,
-                    chat_id=chat_id,
-                    message=message,
-                )
+                handleVote()
                 continue
+            if "время инфо" in str(event):
+                showVoteInfoInDetails()
+                continue
+            if "иду" in str(event):
+                handleCheckIn()
+                continue
+            if "кто идет" in str(event):
+                getPivoDrinkers()
+                continue
+
         if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and (
                 "пивобот " in str(event) or "Пивобот " in str(event)):
             random_id = random.randrange(10000, 90000)
@@ -212,18 +252,8 @@ for event in longpoll.listen():
             print(chats.values())
             keyboard = getVoteKeyboard(chat_id)
             if "опрос показать" in str(event):
-                if not chats[chat_id].poll_created:
-                    vk.messages.send(
-                        random_id=random_id,
-                        chat_id=chat_id,
-                        message="Нет опроса")
-                    continue
-                vk.messages.send(
-                    random_id=random_id,
-                    chat_id=chat_id,
-                    message="Текущий опрос",
-                    keyboard=keyboard.get_keyboard()
-                )
+                showPoll()
+                continue
             if "пиво попито" in str(event):
                 chats[chat_id].pivniye = []
                 chats[chat_id].poll_created = 0
