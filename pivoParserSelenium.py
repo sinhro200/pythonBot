@@ -40,5 +40,3 @@ def edadeal_parser(shop):
             return discounts
         i += 1
         driver.close()
-
-
