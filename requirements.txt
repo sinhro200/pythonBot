@@ -35,4 +35,4 @@ wcwidth==0.1.9
 Werkzeug==1.0.1
 selenium==3.141.0
 bs4==0.0.1
-psycopg=2.8.6
+psycopg==2.8.6
