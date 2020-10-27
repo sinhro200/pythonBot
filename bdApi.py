@@ -7,10 +7,10 @@ USER = os.environ.get('USER')
 PASSWORD = os.environ.get('PASSWORD')
 HOST = os.environ.get('HOST')
 PORT = os.environ.get('PORT')
-conn = psycopg2.connect(dbname=DB, user=USER,
-                        password=PASSWORD,
-                        host=HOST,
-                        port=PORT
+conn = psycopg2.connect(dbname='dffir4iiaufuuk', user='zvxiqorrgyiqgo',
+                        password='36952bb29ac2b84c5b697ea15e1a654448e94284427968d0b2f2a3db577fe1d9',
+                        host='ec2-52-31-233-101.eu-west-1.compute.amazonaws.com',
+                        port='5432'
                         )
 
 
