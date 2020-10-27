@@ -50,7 +50,7 @@ def getAll(chat_id):
         if array is not None:
             for id in array:
                 ids.append(id)
-    ids=set(ids)
+    ids = set(ids)
     for id in ids:
         message += getLink(id)
     return message
@@ -59,6 +59,42 @@ def getAll(chat_id):
 def getLink(id):
     id = str(id)
     return "[id" + id + "|" + getName(id) + "] \n"
+
+
+def getFavourites(chat_id, id):
+    msg = "Ваше избранное пиво: \n"
+    array = chats[chat_id].favourites.get(id)
+    if array is None:
+        return msg
+    for element in chats[chat_id].favourites.get(id):
+        print(element)
+        msg += element + "\n"
+    return msg
+
+
+def getFavouritesDiscounts(chat_id, id):
+    msg = "Скидки на ваше избранное пиво:\n"
+    array = chats[chat_id].favourites.get(id)
+    if array is None:
+        return msg
+    for element in chats[chat_id].favourites.get(id):
+        msg += element + ":\n"
+        discounts = byProductEdadealParser(element)
+        for disount in discounts:
+            msg+="_____"+disount['market']+ " : "+ disount['priceNew']+ "\n"
+    return  msg
+def removeFromFavourites(chat_id, id, name):
+    msg = "Удалено: " + name
+    array = chats[chat_id].favourites.get(id)
+    if array is None:
+        return "Список пуст"
+    array = list(array)
+    try:
+        array.remove(name)
+    except ValueError:
+        return "Нет такого пива в спике"
+    chats[chat_id].favourites.update({id: array})
+    return msg
 
 
 def getPivniye(chat_id):
@@ -157,6 +193,7 @@ class Chat:
     def __init__(self):
         self.poll_created = 0
         self.poll = {}
+        self.favourites = {}
         pass
 
 
@@ -199,6 +236,14 @@ def getPivoDrinkers():
         chat_id=chat_id,
         message=message,
     )
+
+
+def addFavourite(id, name, chat_id):
+    names = chats[chat_id].favourites.get(id)
+    if names is None:
+        names = []
+    names.append(name)
+    chats[chat_id].favourites.update({id: names})
 
 
 def handleVote():
@@ -259,6 +304,37 @@ for event in longpoll.listen():
                     random_id=random_id,
                     chat_id=chat_id,
                     message="Везет)",
+                )
+            if "добавить в избранное" in str(event):
+                name = event.message.text[29::]
+                addFavourite(event.message.from_id, name, chat_id)
+                vk.messages.send(
+                    random_id=random_id,
+                    chat_id=chat_id,
+                    message="добавлено в избранное",
+                )
+            if "показать избранное" in str(event):
+                message = getFavourites(chat_id, event.message.from_id)
+                vk.messages.send(
+                    random_id=random_id,
+                    chat_id=chat_id,
+                    message=message,
+                )
+            if "скидки на избранное" in str(event):
+                message = getFavouritesDiscounts(chat_id, event.message.from_id)
+                vk.messages.send(
+                    random_id=random_id,
+                    chat_id=chat_id,
+                    message=message,
+                )
+            if "удалить из избранного" in str(event):
+                name = event.message.text[30::]
+                print(name)
+                message = removeFromFavourites(chat_id, event.message.from_id, name)
+                vk.messages.send(
+                    random_id=random_id,
+                    chat_id=chat_id,
+                    message=message,
                 )
             if "общий сбор" in str(event):
                 vk.messages.send(
@@ -323,7 +399,13 @@ for event in longpoll.listen():
                           пивобот едадил #[пятерочка/магнит/кб] - акции магазина с едадила\n
                           пивобот голоса инфо - показать результаты опроса по времени\n
                           пивобот лучшее пиво - показать лучшее пиво во вселенной\n
-                          пивобот кто #текст - ну вы поняли\n"""
+                          пивобот кто #текст - ну вы поняли\n
+                          пивобот добавить в избранное #название - добавить пиво в избранное
+                          пивобот убрать из избранного #навзание - убрать из избранного
+                          пивобот показать избранное - показать ваше избранное пиво
+                          пивобот скидки на избранное - скидки на ваше избранное пиво"""
+
+
 
                 vk.messages.send(
                     random_id=random_id,
