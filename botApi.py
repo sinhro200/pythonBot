@@ -45,10 +45,14 @@ def getName(id):
 
 def getAll(chat_id):
     message = "Призываю вас:\n"
+    ids = []
     for array in chats[chat_id].poll.values():
         if array is not None:
             for id in array:
-                message += getLink(id)
+                ids.append(id)
+    ids=set(ids)
+    for id in ids:
+        message += getLink(id)
     return message
 
 
