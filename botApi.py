@@ -3,7 +3,7 @@ import requests
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
-
+import bdApi
 from pivoParser import parsePyaterochka, parseMagnit, parseKb
 from pivoParserSelenium import *
 
@@ -27,10 +27,11 @@ def uploadImages(images, offset, vk_session):
 def getName(id):
     payload = {'user_id': id, 'access_token': token, 'v': '5.124'}
     response = requests.get("https://api.vk.com/method/users.get", params=payload)
+    print(response)
 
     resp_keys = response.text.split(":")
     print(resp_keys)
-    first_name = resp_keys[3]
+    first_name = resp_keys[2]
     first_name = first_name.split(",")[0]
     first_name = first_name[1:]
     first_name = first_name[:-1]
@@ -43,10 +44,13 @@ def getName(id):
     return first_name + " " + last_name
 
 
-def getAll(chat_id):
+def getAll(current_chat_id):
     message = "Призываю вас:\n"
     ids = []
-    for array in chats[chat_id].poll.values():
+    poll = bdApi.getPollByChatId(current_chat_id)
+    if poll is None or poll == "NULL":
+        return message
+    for array in poll.values():
         if array is not None:
             for id in array:
                 ids.append(id)
@@ -61,31 +65,33 @@ def getLink(id):
     return "[id" + id + "|" + getName(id) + "] \n"
 
 
-def getFavourites(chat_id, id):
+def getFavourites(user_id):
     msg = "Ваше избранное пиво: \n"
-    array = chats[chat_id].favourites.get(id)
+    array = bdApi.getUsersFavourites(user_id)
     if array is None:
         return msg
-    for element in chats[chat_id].favourites.get(id):
+    for element in array:
         print(element)
         msg += element + "\n"
     return msg
 
 
-def getFavouritesDiscounts(chat_id, id):
+def getFavouritesDiscounts(user_id):
     msg = "Скидки на ваше избранное пиво:\n"
-    array = chats[chat_id].favourites.get(id)
+    array = bdApi.getUsersFavourites(user_id)
     if array is None:
         return msg
-    for element in chats[chat_id].favourites.get(id):
+    for element in array:
         msg += element + ":\n"
         discounts = byProductEdadealParser(element)
         for disount in discounts:
-            msg+="_____"+disount['market']+ " : "+ disount['priceNew']+ "\n"
-    return  msg
-def removeFromFavourites(chat_id, id, name):
-    msg = "Удалено: " + name
-    array = chats[chat_id].favourites.get(id)
+            msg += "\n" + disount['description'] + "\n " + disount['market'] + "\n" + disount['priceNew'] + "\n"
+    return msg
+
+
+def removeFromFavourites(user_id, fav_name):
+    msg = "Удалено: " + fav_name
+    array = bdApi.getUsersFavourites(user_id)
     if array is None:
         return "Список пуст"
     array = list(array)
@@ -93,15 +99,18 @@ def removeFromFavourites(chat_id, id, name):
         array.remove(name)
     except ValueError:
         return "Нет такого пива в спике"
-    chats[chat_id].favourites.update({id: array})
+    bdApi.updateUsersFavourites(user_id, array)
     return msg
 
 
-def getPivniye(chat_id):
+def getPivniye(current_chat_id):
     ids = "\n"
-    print(chats[chat_id].poll.values())
+    poll = bdApi.getPollByChatId(current_chat_id)
+    if poll == "NULL" or poll is None:
+        ids += "Никто\n"
+        return ids
     ids_set = set()
-    for element in chats[chat_id].poll.values():
+    for element in poll.values():
         if element is not None:
             ids_set.update(set(element))
     print(ids_set)
@@ -110,14 +119,15 @@ def getPivniye(chat_id):
     return ids
 
 
-def getPollInfo(chat_id):
+def getPollInfo(current_chat_id):
     info = "Инфо по голосам: \n"
-    if len(chats[chat_id].poll.keys()) == 0:
-        return "никто еще не голосовал"
-    for time in chats[chat_id].poll.keys():
-        if chats[chat_id].poll.get(time) is not None:
+    poll = bdApi.getPollByChatId(current_chat_id)
+    if poll is None or poll == "NULL":
+        return "Нет опроса"
+    for time in poll.keys():
+        if poll.get(time) is not None:
             info += time + ": \n"
-            for id in chats[chat_id].poll.get(time):
+            for id in poll.get(time):
                 info += getName(id) + '\n'
             info += "\n"
     return info
@@ -130,19 +140,21 @@ def whoIs(message, members):
     return "Очевидно что " + message + " " + getName(members[index]["member_id"])
 
 
-def addPollValue(value, id):
+def addPollValue(value, id, current_chat_id):
     ids = []
-    if value in chats[chat_id].poll.keys():
-        ids = chats[chat_id].poll.get(value)
+    poll = bdApi.getPollByChatId(current_chat_id)
+    if value in poll.keys():
+        ids = poll.get(value)
         if ids == None:
             ids = []
         if id in ids:
             return
     ids.append(id)
-    chats[chat_id].poll.update({value: ids})
+    poll.update({value: ids})
+    bdApi.updatePoll(current_chat_id, poll)
 
 
-def createPollMessage(time_from, time_to, chat_id):
+def createPollMessage(time_from, time_to, current_chat_id):
     i = time_from
     poll_data = "Варианты времени:\n"
     time_data = ""
@@ -156,17 +168,18 @@ def createPollMessage(time_from, time_to, chat_id):
         poll_data += time_data + "\n"
         i += 0.5
     time_values.append("Не важно")
-    chats[chat_id].poll = {key: None for key in time_values}
-    print(chats[chat_id].poll)
+    bdApi.updatePoll(current_chat_id, {key: None for key in time_values})
     return poll_data
 
 
-def getVoteKeyboard(chat_id):
+def getVoteKeyboard(current_chat_id):
     settings = dict(one_time=False, inline=True)
     keyboard = VkKeyboard(**settings)
-    print(chats[chat_id].poll.keys())
+    poll = bdApi.getPollByChatId(current_chat_id)
+    if poll is None or poll == "NULL":
+        return None
     i = 0
-    for time_value in chats[chat_id].poll.keys():
+    for time_value in poll.keys():
         i += 1
         print("time value" + str(time_value))
         keyboard.add_callback_button(label=time_value, color=VkKeyboardColor.SECONDARY,
@@ -189,83 +202,74 @@ longpoll = VkBotLongPoll(vk_session, group_id)
 vk = vk_session.get_api()
 
 
-class Chat:
-    def __init__(self):
-        self.poll_created = 0
-        self.poll = {}
-        self.favourites = {}
-        pass
-
-
-chats = {}
-
-
-def showPoll():
-    if not chats[chat_id].poll_created:
+def showPoll(current_chat_id, poll_keyboard):
+    poll = bdApi.getPollByChatId(current_chat_id)
+    if poll is None or poll_keyboard is None:
         vk.messages.send(
             random_id=random_id,
-            chat_id=chat_id,
+            chat_id=current_chat_id,
             message="Нет опроса")
-        # continue
     else:
         vk.messages.send(
             random_id=random_id,
-            chat_id=chat_id,
+            chat_id=current_chat_id,
             message="Текущий опрос",
-            keyboard=keyboard.get_keyboard()
+            keyboard=poll_keyboard.get_keyboard()
         )
 
 
-def showVoteInfoInDetails():
-    message: str
-    if not chats[chat_id].poll_created:
-        message = "Нет опроса"
+def showVoteInfoInDetails(current_chat_id):
+    msg: str
+    poll = bdApi.getPollByChatId(current_chat_id)
+    if poll is None or poll == "NULL":
+        msg = "Нет опроса"
     else:
-        message = getPollInfo(chat_id)
+        msg = getPollInfo(current_chat_id)
     vk.messages.send(
         random_id=random_id,
-        chat_id=chat_id,
-        message=message,
+        chat_id=current_chat_id,
+        message=msg,
     )
 
 
-def getPivoDrinkers():
-    message = "Идут пить пиво :" + getPivniye(chat_id)
+def getPivoDrinkers(current_chat_id):
+    msg = "Идут пить пиво :" + getPivniye(current_chat_id)
     vk.messages.send(
         random_id=random_id,
-        chat_id=chat_id,
-        message=message,
+        chat_id=current_chat_id,
+        message=msg,
     )
 
 
-def addFavourite(id, name, chat_id):
-    names = chats[chat_id].favourites.get(id)
+def addFavourite(user_id, fav_name):
+    names = bdApi.getUsersFavourites(user_id)
     if names is None:
         names = []
-    names.append(name)
-    chats[chat_id].favourites.update({id: names})
+    names.append('"'+fav_name+'"')
+    bdApi.updateUsersFavourites(user_id, names)
 
 
-def handleVote():
-    if not chats[chat_id].poll_created:
-        message = "Нет опроса"
+def handleVote(current_chat_id):
+    msg: str
+    poll = bdApi.getPollByChatId(current_chat_id)
+    if poll is None:
+        msg = "Нет опроса"
     else:
         time = "empty"
         try:
-            time = str(event.message.text[33:])
-            print(time)
-            if time not in chats[chat_id].poll.keys():
-                message = "Время не в диапазоне соси"
+            cur_time = str(event.message.text[33:])
+            if cur_time not in poll.keys():
+                msg = "Время не в диапазоне соси"
             else:
-                addPollValue(time, event.message.from_id)
-                message = "Принял"
+                addPollValue(cur_time, event.message.from_id, chat_id)
+                msg = "Принял"
         except BaseException:
-            message = "Неверно задано время"
-    print(chats[chat_id].poll)
+            msg = "Неверно задано время"
+    print(poll)
     vk.messages.send(
         random_id=random_id,
-        chat_id=chat_id,
-        message=message,
+        chat_id=current_chat_id,
+        message=msg,
     )
 
 
@@ -274,32 +278,34 @@ def handleVote():
 for event in longpoll.listen():
     for event in longpoll.listen():
         if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and ("@public" + group_id) in str(event):
-            if str(event.message.text[33:]) in chats[chat_id].poll.keys():
-                handleVote()
+            poll = bdApi.getPollByChatId(chat_id)
+            if poll is not None and str(event.message.text[33:]) in poll.keys():
+                handleVote(chat_id)
                 continue
             if "голоса инфо" in str(event):
-                showVoteInfoInDetails()
+                showVoteInfoInDetails(chat_id)
                 continue
             if "кто идет" in str(event):
-                getPivoDrinkers()
+                getPivoDrinkers(chat_id)
                 continue
 
         if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and (
                 "пивобот " in str(event) or "Пивобот " in str(event)):
             random_id = random.randrange(10000, 90000)
             chat_id = int(event.chat_id)
-            if chat_id not in chats.keys():
-                chat = Chat()
-                chats.update({chat_id: chat})
-            print(event.message)
-            print(chats.values())
-            keyboard = getVoteKeyboard(chat_id)
             if "опрос показать" in str(event):
-                showPoll()
+                keyboard = getVoteKeyboard(chat_id)
+                if keyboard is None:
+                    vk.messages.send(
+                        random_id=random_id,
+                        chat_id=chat_id,
+                        message="Нет опроса",
+                    )
+                    continue
+                showPoll(chat_id, keyboard)
                 continue
             if "пиво попито" in str(event):
-                chats[chat_id].poll_created = 0
-                chats[chat_id].poll = {}
+                bdApi.cleanPoll(chat_id)
                 vk.messages.send(
                     random_id=random_id,
                     chat_id=chat_id,
@@ -307,21 +313,21 @@ for event in longpoll.listen():
                 )
             if "добавить в избранное" in str(event):
                 name = event.message.text[29::]
-                addFavourite(event.message.from_id, name, chat_id)
+                addFavourite(event.message.from_id, name)
                 vk.messages.send(
                     random_id=random_id,
                     chat_id=chat_id,
                     message="добавлено в избранное",
                 )
             if "показать избранное" in str(event):
-                message = getFavourites(chat_id, event.message.from_id)
+                message = getFavourites(event.message.from_id)
                 vk.messages.send(
                     random_id=random_id,
                     chat_id=chat_id,
                     message=message,
                 )
             if "скидки на избранное" in str(event):
-                message = getFavouritesDiscounts(chat_id, event.message.from_id)
+                message = getFavouritesDiscounts(event.message.from_id)
                 vk.messages.send(
                     random_id=random_id,
                     chat_id=chat_id,
@@ -330,7 +336,7 @@ for event in longpoll.listen():
             if "удалить из избранного" in str(event):
                 name = event.message.text[30::]
                 print(name)
-                message = removeFromFavourites(chat_id, event.message.from_id, name)
+                message = removeFromFavourites(event.message.from_id, name)
                 vk.messages.send(
                     random_id=random_id,
                     chat_id=chat_id,
@@ -344,7 +350,7 @@ for event in longpoll.listen():
                 )
 
             if "кто идет" in str(event):
-                getPivoDrinkers()
+                getPivoDrinkers(chat_id)
                 continue
             if "кто" in str(event):
                 members = \
@@ -369,10 +375,9 @@ for event in longpoll.listen():
                             message="Ты че дурак чтоли а",
                         )
                         continue
-                    poll_message = createPollMessage(int(times[0]), int(times[1]), chat_id)
-                    chats[chat_id].poll_created = 1
+                    createPollMessage(int(times[0]), int(times[1]), chat_id)
                     keyboard = getVoteKeyboard(chat_id)
-                    showPoll()
+                    showPoll(chat_id, keyboard)
                     continue
                 except BaseException:
                     vk.messages.send(
@@ -382,7 +387,7 @@ for event in longpoll.listen():
                     )
 
             if "голоса инфо" in str(event):
-                showVoteInfoInDetails()
+                showVoteInfoInDetails(chat_id)
                 continue
             if "лучшее пиво" in str(event):
                 vk.messages.send(
@@ -404,8 +409,6 @@ for event in longpoll.listen():
                           пивобот убрать из избранного #навзание - убрать из избранного
                           пивобот показать избранное - показать ваше избранное пиво
                           пивобот скидки на избранное - скидки на ваше избранное пиво"""
-
-
 
                 vk.messages.send(
                     random_id=random_id,

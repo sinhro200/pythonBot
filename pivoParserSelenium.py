@@ -80,7 +80,7 @@ def byProductEdadealParser(product):
     result = []
     for a in res:
         elem = {
-
+                "description": a.find("div", {"class": "b-offer__description"}).get_text(),
                  "market": a.find("div", {"class": "b-offer__retailer-icon"}).get('title'),
                  "priceNew": a.find("div", {"class": "b-offer__price-new"}).get_text(),
         }
