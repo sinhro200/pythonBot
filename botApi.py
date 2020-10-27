@@ -72,7 +72,7 @@ def getFavourites(user_id):
         return msg
     for element in array:
         print(element)
-        msg += element + "\n"
+        msg += "⭐" + element + "\n"
     return msg
 
 
@@ -82,10 +82,10 @@ def getFavouritesDiscounts(user_id):
     if array is None:
         return msg
     for element in array:
-        msg += "⭐"+element + ":\n"
+        msg += "\n⭐"+element + ":\n"
         discounts = byProductEdadealParser(element)
         for disount in discounts:
-            msg += "\n" +" 🍺"+ disount['description'] + "\n " + " 🛒"+disount['market'] + "\n" +" 💲"+ disount['priceNew'] + "\n"
+            msg += "_🍺"+ disount['description'] + "\n " + "_🛒"+disount['market'] + "\n" +"_💲"+ disount['priceNew'] + "\n"
     return msg
 
 
@@ -126,9 +126,9 @@ def getPollInfo(current_chat_id):
         return "Нет опроса"
     for time in poll.keys():
         if poll.get(time) is not None:
-            info += time + ": \n"
+            info += "⏱"+time + ": \n"
             for id in poll.get(time):
-                info += getName(id) + '\n'
+                info += "🧍"+getName(id) + '\n'
             info += "\n"
     return info
 
@@ -137,7 +137,7 @@ def whoIs(message, members):
     index = random.randrange(0, len(members) - 1)
     while members[index]["member_id"] < 0:
         index = random.randrange(0, len(members) - 1)
-    return "Очевидно что " + message + " " + getName(members[index]["member_id"])
+    return "🤔Очевидно что " + message + " " + getName(members[index]["member_id"])
 
 
 def addPollValue(value, id, current_chat_id):
