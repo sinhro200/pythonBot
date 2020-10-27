@@ -83,11 +83,11 @@ def getFavouritesDiscounts(user_id):
     if array is None:
         return msg
     for element in array:
-        msg += "\n⭐"+element + ":\n"
+        msg += "\n⭐"+element + ":"
         discounts = byProductEdadealParser(element)
         discounts.sort(key=byShopSort)
         for disount in discounts:
-            msg += "_🍺"+ disount['description'] + "\n " + "_🛒"+disount['market'] + "\n" +"_💲"+ disount['priceNew'] + "\n"
+            msg += "\n🍺🍺"+ disount['description'] + "\n " + "🛒🛒"+disount['market'] + "\n" +"💲💲"+ disount['priceNew'] + "\n"
     return msg
 
 
