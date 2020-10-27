@@ -87,7 +87,7 @@ def getFavouritesDiscounts(user_id):
         discounts = byProductEdadealParser(element)
         discounts.sort(key=byShopSort)
         for disount in discounts:
-            msg += "\n🍺🍺"+ disount['description'] + "\n " + "🛒🛒"+disount['market'] + "\n" +"💲💲"+ disount['priceNew'] + "\n"
+            msg += "\n&#12288;🍺🍺"+ disount['description'] + "\n " + "🛒🛒"+disount['market'] + "\n" +"💲💲"+ disount['priceNew'] + "\n"
     return msg
 
 
