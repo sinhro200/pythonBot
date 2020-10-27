@@ -74,7 +74,8 @@ def getFavourites(user_id):
         print(element)
         msg += "⭐" + element + "\n"
     return msg
-
+def byShopSort(t):
+    return t['market']
 
 def getFavouritesDiscounts(user_id):
     msg = "Скидки на ваше избранное пиво:\n"
@@ -84,6 +85,7 @@ def getFavouritesDiscounts(user_id):
     for element in array:
         msg += "\n⭐"+element + ":\n"
         discounts = byProductEdadealParser(element)
+        discounts.sort(key=byShopSort)
         for disount in discounts:
             msg += "_🍺"+ disount['description'] + "\n " + "_🛒"+disount['market'] + "\n" +"_💲"+ disount['priceNew'] + "\n"
     return msg
