@@ -56,7 +56,7 @@ def getAll(current_chat_id):
                 ids.append(id)
     ids = set(ids)
     for id in ids:
-        message += getLink(id)
+        message += "🧍"+getLink(id) +"\n"
     return message
 
 
@@ -72,7 +72,7 @@ def getFavourites(user_id):
         return msg
     for element in array:
         print(element)
-        msg += "⭐" + element + "\n"
+        msg += "&#12288;⭐" + element + "\n"
     return msg
 def byShopSort(t):
     return t['market']
@@ -87,7 +87,7 @@ def getFavouritesDiscounts(user_id):
         discounts = byProductEdadealParser(element)
         discounts.sort(key=byShopSort)
         for disount in discounts:
-            msg += "\n&#12288;🍺🍺"+ disount['description'] + "\n " + "🛒🛒"+disount['market'] + "\n" +"💲💲"+ disount['priceNew'] + "\n"
+            msg += "\n&#12288;🍺🍺"+ disount['description'] + "\n " + "&#12288;🛒🛒"+disount['market'] + "\n" +"&#12288;💲💲"+ disount['priceNew'] + "\n"
     return msg
 
 
@@ -117,7 +117,7 @@ def getPivniye(current_chat_id):
             ids_set.update(set(element))
     print(ids_set)
     for id in ids_set:
-        ids += getName(id)
+        ids += "&#12288;🧍" +getName(id) +"/n"
     return ids
 
 
@@ -130,7 +130,7 @@ def getPollInfo(current_chat_id):
         if poll.get(time) is not None:
             info += "⏱"+time + ": \n"
             for id in poll.get(time):
-                info += "🧍"+getName(id) + '\n'
+                info += "&#12288;🧍"+getName(id) + '\n'
             info += "\n"
     return info
 
