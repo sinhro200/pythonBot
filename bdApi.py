@@ -2,17 +2,12 @@ import psycopg2
 import json
 import os
 
-DB = str(os.environ.get('DB'))
-USER = str(os.environ.get('USER'))
-PASSWORD = str(os.environ.get('PASSWORD'))
-HOST = str(os.environ.get('HOST'))
-PORT = str(os.environ.get('PORT'))
-conn = psycopg2.connect(dbname=DB,
-                        user=USER,
-                        password=PASSWORD,
-                        host=HOST,
-                        port=PORT
-                        )
+DATABASE_HOST =os.environ.get('DATABASE_HOST')
+DATABASE_USERNAME =os.environ.get('DATABASE_USERNAME')
+DATABASE_PASSWORD =os.environ.get('DATABASE_PASSWORD')
+DATABASE_PORT =os.environ.get('DATABASE_PORT')
+DATABASE_NAME =os.environ.get('DATABASE_NAME')
+conn = psycopg2.connect('')
 
 
 def getPollByChatId(chat_id):
