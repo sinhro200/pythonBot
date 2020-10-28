@@ -205,11 +205,11 @@ def getVoteKeyboard(current_chat_id):
     for time_value in poll.keys():
         i += 1
         print("time value" + str(time_value))
-        keyboard.add_callback_button(label=time_value, color=VkKeyboardColor.POSITIVE)
+        keyboard.add_button(label=time_value, color=VkKeyboardColor.POSITIVE)
         if i % 3 == 0:
             keyboard.add_line()
-    keyboard.add_callback_button(label='голоса инфо', color=VkKeyboardColor.SECONDARY)
-    keyboard.add_callback_button(label='кто идет', color=VkKeyboardColor.SECONDARY)
+    keyboard.add_button(label='голоса инфо', color=VkKeyboardColor.SECONDARY)
+    keyboard.add_button(label='кто идет', color=VkKeyboardColor.SECONDARY)
 
     return keyboard
 
