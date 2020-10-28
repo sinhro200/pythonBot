@@ -271,7 +271,7 @@ def addFavourite(user_id, fav_name):
     bdApi.updateUsersFavourites(user_id, names)
 
 
-def handleVote(current_chat_id):
+def handleVote(current_chat_id,cur_time):
     msg: str
     poll = bdApi.getPollByChatId(current_chat_id)
     if poll is None:
@@ -302,9 +302,29 @@ for event in longpoll.listen():
         if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and (
                 ("@public" + group_id) in str(event) or ("@club" + group_id) in str(event)):
             poll = bdApi.getPollByChatId(chat_id)
-            if poll is not None and str(event.message.text[33:]) in poll.keys():
-                handleVote(chat_id)
-                continue
+            if poll is not None and str(event.message.text[:5]) in poll.keys():
+                try:
+                    handleVote(chat_id,event.message.text[:5])
+                    continue
+                except BaseException:
+                    vk.messages.send(
+                        random_id=random_id,
+                        chat_id=chat_id,
+                        message="Неверно задано время",
+                    )
+                    continue
+            if poll is not None and str(event.message.text[:4]) in poll.keys():
+                try:
+                    handleVote(chat_id,event.message.text[:4])
+                    continue
+                except BaseException:
+                    vk.messages.send(
+                        random_id=random_id,
+                        chat_id=chat_id,
+                        message="Неверно задано время",
+                    )
+                    continue
+
             if "голоса инфо" in str(event):
                 showVoteInfoInDetails(chat_id)
                 continue
