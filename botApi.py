@@ -23,22 +23,25 @@ def uploadImages(images, offset, vk_session):
         i += 1
     return attachments
 
+
 def getRandomBeerMessage(vk_session):
-    beer= randomBeerParser()
-    msg="Почему бы сегодня не выпить: \n"
-    msg+="🍺"+beer['name']+'\n'+"⭐"+beer['rating'] +"\n 💬Отзывы:\n"+beer['url']
-    image_url= beer['image']
+    beer = randomBeerParser()
+    msg = "Почему бы сегодня не выпить: \n"
+    msg += "🍺" + beer['name'] + '\n' + "⭐" + beer['rating'] + "\n 💬Отзывы:\n" + beer['url']
+    image_url = beer['image']
     session = requests.Session()
     upload = vk_api.VkUpload(vk_session)
     image = session.get(image_url, stream=True)
     photo = upload.photo_messages(photos=image.raw)[0]
-    attachments='photo{}_{}_{}'.format(photo['owner_id'], photo['id'], photo['access_key'])
+    attachments = 'photo{}_{}_{}'.format(photo['owner_id'], photo['id'], photo['access_key'])
     vk.messages.send(
         random_id=random_id,
         chat_id=chat_id,
         message=msg,
         attachment=attachments
     )
+
+
 def getName(id):
     payload = {'user_id': id, 'access_token': token, 'v': '5.124'}
     response = requests.get("https://api.vk.com/method/users.get", params=payload)
@@ -70,7 +73,7 @@ def getAll(current_chat_id):
                 ids.append(id)
     ids = set(ids)
     for id in ids:
-        message += "🧍"+getLink(id) +"\n"
+        message += "🧍" + getLink(id) + "\n"
     return message
 
 
@@ -88,8 +91,11 @@ def getFavourites(user_id):
         print(element)
         msg += "&#12288;⭐" + element + "\n"
     return msg
+
+
 def byShopSort(t):
     return t['market']
+
 
 def getFavouritesDiscounts(user_id):
     msg = "Скидки на ваше избранное пиво:\n"
@@ -97,11 +103,12 @@ def getFavouritesDiscounts(user_id):
     if array is None:
         return msg
     for element in array:
-        msg += "\n⭐"+element + ":"
+        msg += "\n⭐" + element + ":"
         discounts = byProductEdadealParser(element)
         discounts.sort(key=byShopSort)
         for disount in discounts:
-            msg += "\n&#12288;🍺🍺"+ disount['description'] + "\n " + "&#12288;🛒🛒"+disount['market'] + "\n" +"&#12288;💲💲"+ disount['priceNew'] + "\n"
+            msg += "\n&#12288;🍺🍺" + disount['description'] + "\n " + "&#12288;🛒🛒" + disount[
+                'market'] + "\n" + "&#12288;💲💲" + disount['priceNew'] + "\n"
     return msg
 
 
@@ -131,7 +138,7 @@ def getPivniye(current_chat_id):
             ids_set.update(set(element))
     print(ids_set)
     for id in ids_set:
-        ids += "&#12288;🧍" +getName(id) +"\n"
+        ids += "&#12288;🧍" + getName(id) + "\n"
     return ids
 
 
@@ -142,9 +149,9 @@ def getPollInfo(current_chat_id):
         return "Нет опроса"
     for time in poll.keys():
         if poll.get(time) is not None:
-            info += "⏱"+time + ": \n"
+            info += "⏱" + time + ": \n"
             for id in poll.get(time):
-                info += "&#12288;🧍"+getName(id) + '\n'
+                info += "&#12288;🧍" + getName(id) + '\n'
             info += "\n"
     return info
 
@@ -209,7 +216,7 @@ def getVoteKeyboard(current_chat_id):
 
 
 # API-ключ созданный ранее
-token =os.environ.get('ACCESS_TOKEN')
+token = os.environ.get('ACCESS_TOKEN')
 # Авторизуемся как сообщество
 vk_session = vk_api.VkApi(token=token, api_version='5.124')
 group_id = os.environ.get('GROUP_ID')
@@ -261,7 +268,7 @@ def addFavourite(user_id, fav_name):
     names = bdApi.getUsersFavourites(user_id)
     if names is None:
         names = []
-    names.append('"'+fav_name+'"')
+    names.append('"' + fav_name + '"')
     bdApi.updateUsersFavourites(user_id, names)
 
 
@@ -306,7 +313,7 @@ for event in longpoll.listen():
                 continue
 
         if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and (
-                "пивобот " in str(event) or "Пивобот " in str(event)):
+                "пивобот " in str(event) or "Пивобот " in str(event)) and (event.message.text[1:7] == "ивобот"):
             random_id = random.randrange(10000, 90000)
             chat_id = int(event.chat_id)
             if "опрос показать" in str(event):
@@ -425,9 +432,11 @@ for event in longpoll.listen():
                           пивобот лучшее пиво - показать лучшее пиво во вселенной\n
                           пивобот кто #текст - ну вы поняли\n
                           пивобот добавить в избранное #название - добавить пиво в избранное
-                          пивобот убрать из избранного #навзание - убрать из избранного
+                          пивобот удалить из избранного #навзание - убрать из избранного
                           пивобот показать избранное - показать ваше избранное пиво
-                          пивобот скидки на избранное - скидки на ваше избранное пиво"""
+                          пивобот скидки на избранное - скидки на ваше избранное пиво
+                          пивобот случайное пиво - посоветовать случайное пиво
+                          """
 
                 vk.messages.send(
                     random_id=random_id,

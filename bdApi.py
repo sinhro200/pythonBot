@@ -83,3 +83,4 @@ def createPoll(chat_id, poll):
     json_poll = json.dumps(poll)
     cursor.execute("insert into chats(chat_id,poll) values(%s, %s)", (chat_id, json_poll))
     conn.commit()
+
