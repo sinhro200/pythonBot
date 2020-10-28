@@ -98,13 +98,14 @@ def byShopSort(t):
 
 
 def getFavouritesDiscounts(user_id):
-    msg = "Скидки на ваше избранное пиво:\n"
+    city = bdApi.getCity(user_id)
+    msg = "Скидки на ваше избранное пиво в городе"+city+":\n"
     array = bdApi.getUsersFavourites(user_id)
     if array is None:
         return msg
     for element in array:
         msg += "\n⭐" + element + ":"
-        discounts = byProductEdadealParser(element)
+        discounts = byProductEdadealParser(element,city)
         discounts.sort(key=byShopSort)
         for disount in discounts:
             msg += "\n&#12288;🍺🍺" + disount['description'] + "\n " + "&#12288;🛒🛒" + disount[
@@ -138,7 +139,7 @@ def getPivniye(current_chat_id):
             ids_set.update(set(element))
     print(ids_set)
     for id in ids_set:
-        ids += "&#12288;🧍" + getName(id) + "\n"
+        ids += "&#12288;😋" + getName(id) + "\n"
     return ids
 
 
@@ -151,7 +152,7 @@ def getPollInfo(current_chat_id):
         if poll.get(time) is not None:
             info += "⏱" + time + ": \n"
             for id in poll.get(time):
-                info += "&#12288;🧍" + getName(id) + '\n'
+                info += "&#12288;😋" + getName(id) + '\n'
             info += "\n"
     return info
 
@@ -218,7 +219,7 @@ def getVoteKeyboard(current_chat_id):
 token = os.environ.get('ACCESS_TOKEN')
 # Авторизуемся как сообщество
 vk_session = vk_api.VkApi(token=token, api_version='5.124')
-group_id = os.environ.get('GROUP_ID')
+group_id =os.environ.get('GROUP_ID')
 # Работа с сообщениями
 longpoll = VkBotLongPoll(vk_session, group_id)
 vk = vk_session.get_api()
@@ -351,6 +352,14 @@ for event in longpoll.listen():
                     chat_id=chat_id,
                     message="добавлено в избранное",
                 )
+            if "установить город" in str(event):
+                city = event.message.text[25::]
+                bdApi.updateCity(event.message.from_id,city)
+                vk.messages.send(
+                    random_id=random_id,
+                    chat_id=chat_id,
+                    message="Установлен город "+city,
+                )
             if "показать избранное" in str(event):
                 message = getFavourites(event.message.from_id)
                 vk.messages.send(
@@ -452,16 +461,18 @@ for event in longpoll.listen():
                     message=message,
                 )
             if "едадил" in str(event):
-                message = ''
+
+                city=bdApi.getCity(event.message.from_id)
+                message = 'Город '+city+":\n"
                 if "пятерочка" in str(event):
-                    products = edadeal_parser("5ka")
-                    message = "Скидки в пятерочке: \n"
+                    products = edadeal_parser("5ka",city)
+                    message += "Скидки в пятерочке: \n"
                 elif "магнит" in str(event):
-                    products = edadeal_parser("magnit-univer")
-                    message = "Скидки в магните: \n "
+                    products = edadeal_parser("magnit-univer",city)
+                    message += "Скидки в магните: \n "
                 elif "кб" in str(event):
-                    products = edadeal_parser("krasnoeibeloe")
-                    message = "Скидки в кб: \n"
+                    products = edadeal_parser("krasnoeibeloe",city)
+                    message += "Скидки в кб: \n"
                 else:
                     vk.messages.send(
                         random_id=random_id,

@@ -7,9 +7,12 @@ from selenium.webdriver.support import expected_conditions as EC
 import random
 import urllib.request
 from urllib.parse import quote
+import transliterator
 
 
-def edadeal_parser(shop):
+def edadeal_parser(shop,city):
+    city=city.lower()
+    city=transliterator.transliterate(city)
     GOOGLE_CHROME_BIN = os.environ.get('GOOGLE_CHROME_BIN')
     CHROMEDRIVER_PATH = os.environ.get('CHROMEDRIVER_PATH')
     chrome_options = webdriver.ChromeOptions()
@@ -24,7 +27,7 @@ def edadeal_parser(shop):
     while True:
         print("page" + str(i))
         driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=chrome_options)
-        driver.get("https://edadeal.ru/voronezh/retailers/" + shop + "?page=" + str(i) + "&segment=beer-cider")
+        driver.get("https://edadeal.ru/"+city+"/retailers/" + shop + "?page=" + str(i) + "&segment=beer-cider")
         print(driver.current_url)
         html = driver.page_source
 
@@ -48,7 +51,9 @@ def edadeal_parser(shop):
         driver.close()
 
 
-def byProductEdadealParser(product):
+def byProductEdadealParser(product,city):
+    city = city.lower()
+    city = transliterator.transliterate(city)
     GOOGLE_CHROME_BIN = os.environ.get('GOOGLE_CHROME_BIN')
     CHROMEDRIVER_PATH = os.environ.get('CHROMEDRIVER_PATH')
     chrome_options = webdriver.ChromeOptions()
@@ -59,7 +64,7 @@ def byProductEdadealParser(product):
     chrome_options.add_argument('--disable-dev-shm-usage')
     chrome_options.binary_location = GOOGLE_CHROME_BIN
     driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=chrome_options)
-    url = "https://edadeal.ru/voronezh/offers"
+    url = "https://edadeal.ru/"+city+"/offers"
     print(url)
     driver.get(url)
     search = driver.find_element("class name", "b-header__search-input")
