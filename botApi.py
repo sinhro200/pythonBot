@@ -23,12 +23,26 @@ def uploadImages(images, offset, vk_session):
         i += 1
     return attachments
 
-
+def getRandomBeerMessage(vk_session):
+    beer= randomBeerParser()
+    msg="Почему бы сегодня не выпить: \n"
+    msg+="🍺"+beer['name']+'\n'+"⭐"+beer['rating'] +"\n 💬Отзывы:\n"+beer['url']
+    image_url= beer['image']
+    session = requests.Session()
+    upload = vk_api.VkUpload(vk_session)
+    image = session.get(image_url, stream=True)
+    photo = upload.photo_messages(photos=image.raw)[0]
+    attachments='photo{}_{}_{}'.format(photo['owner_id'], photo['id'], photo['access_key'])
+    vk.messages.send(
+        random_id=random_id,
+        chat_id=chat_id,
+        message=msg,
+        attachment=attachments
+    )
 def getName(id):
     payload = {'user_id': id, 'access_token': token, 'v': '5.124'}
     response = requests.get("https://api.vk.com/method/users.get", params=payload)
     print(response)
-
     resp_keys = response.text.split(":")
     print(resp_keys)
     first_name = resp_keys[2]
@@ -117,7 +131,7 @@ def getPivniye(current_chat_id):
             ids_set.update(set(element))
     print(ids_set)
     for id in ids_set:
-        ids += "&#12288;🧍" +getName(id) +"/n"
+        ids += "&#12288;🧍" +getName(id) +"\n"
     return ids
 
 
@@ -350,6 +364,9 @@ for event in longpoll.listen():
                     chat_id=chat_id,
                     message=getAll(chat_id),
                 )
+            if "случайное пиво" in str(event):
+                getRandomBeerMessage(vk)
+                continue
 
             if "кто идет" in str(event):
                 getPivoDrinkers(chat_id)
