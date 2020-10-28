@@ -2,15 +2,16 @@ import psycopg2
 import json
 import os
 
-DB = os.environ.get('DB')
-USER = os.environ.get('USER')
-PASSWORD = os.environ.get('PASSWORD')
-HOST = os.environ.get('HOST')
+DB = str(os.environ.get('DB'))
+USER = str(os.environ.get('USER'))
+PASSWORD = str(os.environ.get('PASSWORD'))
+HOST = str(os.environ.get('HOST'))
 PORT = str(os.environ.get('PORT'))
-conn = psycopg2.connect(dbname=DB, user=USER,
+conn = psycopg2.connect(dbname=DB,
+                        user=USER,
                         password=PASSWORD,
                         host=HOST,
-                        port='5432'
+                        port=PORT
                         )
 
 
