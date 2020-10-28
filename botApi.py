@@ -209,10 +209,10 @@ def getVoteKeyboard(current_chat_id):
 
 
 # API-ключ созданный ранее
-token = "5053247a0cad934c798750243f5425b84ae062a99be994dce2194b7255b8d2afa066a91769e352f2a8f8c"
+token =os.environ.get('ACCESS_TOKEN')
 # Авторизуемся как сообщество
 vk_session = vk_api.VkApi(token=token, api_version='5.124')
-group_id = "199735512"
+group_id = os.environ.get('GROUP_ID')
 # Работа с сообщениями
 longpoll = VkBotLongPoll(vk_session, group_id)
 vk = vk_session.get_api()
