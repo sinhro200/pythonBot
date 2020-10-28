@@ -279,7 +279,6 @@ def handleVote(current_chat_id,cur_time):
     else:
         time = "empty"
         try:
-            cur_time = str(event.message.text[33:])
             if cur_time not in poll.keys():
                 msg = "Время не в диапазоне соси"
             else:
@@ -299,39 +298,29 @@ def handleVote(current_chat_id,cur_time):
 # FIXME [ZK]: пивобот does not follows exact order of commands
 for event in longpoll.listen():
     for event in longpoll.listen():
-        if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and (
-                ("@public" + group_id) in str(event) or ("@club" + group_id) in str(event)):
+        if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and  ("@public" + group_id) in str(event) :
             poll = bdApi.getPollByChatId(chat_id)
-            if poll is not None and str(event.message.text[:5]) in poll.keys():
-                try:
-                    handleVote(chat_id,event.message.text[:5])
-                    continue
-                except BaseException:
-                    vk.messages.send(
-                        random_id=random_id,
-                        chat_id=chat_id,
-                        message="Неверно задано время",
-                    )
-                    continue
-            if poll is not None and str(event.message.text[:4]) in poll.keys():
-                try:
-                    handleVote(chat_id,event.message.text[:4])
-                    continue
-                except BaseException:
-                    vk.messages.send(
-                        random_id=random_id,
-                        chat_id=chat_id,
-                        message="Неверно задано время",
-                    )
-                    continue
-
+            if poll is not None and str(event.message.text[33:]) in poll.keys():
+                print(event.message.text[33:])
+                handleVote(chat_id,event.message.text[33:])
+                continue
             if "голоса инфо" in str(event):
                 showVoteInfoInDetails(chat_id)
                 continue
             if "кто идет" in str(event):
                 getPivoDrinkers(chat_id)
                 continue
-
+        if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and ("@club" + group_id) in str(event):
+            poll = bdApi.getPollByChatId(chat_id)
+            if poll is not None and str(event.message.text[31:]) in poll.keys():
+                handleVote(chat_id,event.message.text[31:])
+                continue
+            if "голоса инфо" in str(event):
+                showVoteInfoInDetails(chat_id)
+                continue
+            if "кто идет" in str(event):
+                getPivoDrinkers(chat_id)
+                continue
         if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and (
                 "пивобот " in str(event) or "Пивобот " in str(event)) and (event.message.text[1:7] == "ивобот"):
             random_id = random.randrange(10000, 90000)
