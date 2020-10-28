@@ -360,6 +360,7 @@ for event in longpoll.listen():
                 )
             if "скидки на избранное" in str(event):
                 message = getFavouritesDiscounts(event.message.from_id)
+                message=message[:4095]
                 vk.messages.send(
                     random_id=random_id,
                     chat_id=chat_id,
