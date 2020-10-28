@@ -206,7 +206,8 @@ def getVoteKeyboard(current_chat_id):
         i += 1
         print("time value" + str(time_value))
         keyboard.add_callback_button(label=time_value, color=VkKeyboardColor.SECONDARY,
-                                     payload={"type": "message_new", "text": "я за " + time_value})
+                                     payload={"action": {"type": "message_new", "text": "я за " + time_value},
+                                              "color": "positive"})
         if i % 3 == 0:
             keyboard.add_line()
     keyboard.add_callback_button(label='голоса инфо', color=VkKeyboardColor.SECONDARY)
