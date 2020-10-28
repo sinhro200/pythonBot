@@ -45,9 +45,7 @@ def getRandomBeerMessage(vk_session):
 def getName(id):
     payload = {'user_id': id, 'access_token': token, 'v': '5.124', 'lang': 1}
     response = requests.get("https://api.vk.com/method/users.get", params=payload)
-    print(response)
     resp_keys = response.text.split(":")
-    print(resp_keys)
     first_name = resp_keys[2]
     first_name = first_name.split(",")[0]
     first_name = first_name[1:]
@@ -56,8 +54,6 @@ def getName(id):
     last_name = last_name.split(",")[0]
     last_name = last_name[1:]
     last_name = last_name[:-1]
-    print(first_name)
-    print(last_name)
     return first_name + " " + last_name
 
 
@@ -88,7 +84,6 @@ def getFavourites(user_id):
     if array is None:
         return msg
     for element in array:
-        print(element)
         msg += "&#12288;⭐" + element + "\n"
     return msg
 
@@ -137,7 +132,6 @@ def getPivniye(current_chat_id):
     for element in poll.values():
         if element is not None:
             ids_set.update(set(element))
-    print(ids_set)
     for id in ids_set:
         ids += "&#12288;😋" + getName(id) + "\n"
     return ids
@@ -205,7 +199,6 @@ def getVoteKeyboard(current_chat_id):
     i = 0
     for time_value in poll.keys():
         i += 1
-        print("time value" + str(time_value))
         keyboard.add_button(label=time_value, color=VkKeyboardColor.POSITIVE)
         if i % 3 == 0:
             keyboard.add_line()
@@ -287,7 +280,6 @@ def handleVote(current_chat_id,cur_time):
                 msg = "Принял"
         except BaseException:
             msg = "Неверно задано время"
-    print(poll)
     vk.messages.send(
         random_id=random_id,
         chat_id=current_chat_id,
@@ -302,7 +294,6 @@ for event in longpoll.listen():
         if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and  ("@public" + group_id) in str(event) :
             poll = bdApi.getPollByChatId(chat_id)
             if poll is not None and str(event.message.text[33:]) in poll.keys():
-                print(event.message.text[33:])
                 handleVote(chat_id,event.message.text[33:])
                 continue
             if "голоса инфо" in str(event):
@@ -376,7 +367,6 @@ for event in longpoll.listen():
                 )
             if "удалить из избранного" in str(event):
                 name = event.message.text[30::]
-                print(name)
                 message = removeFromFavourites(event.message.from_id, name)
                 vk.messages.send(
                     random_id=random_id,
@@ -411,7 +401,6 @@ for event in longpoll.listen():
                 try:
                     times = str(event.message.text).split("опрос время ")[1]
                     times = times.split(" ")
-                    print(times)
                     if int(times[0]) > int(times[1]) or int(times[1]) - int(times[0]) > 4:
                         vk.messages.send(
                             random_id=random_id,

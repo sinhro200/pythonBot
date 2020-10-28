@@ -25,10 +25,8 @@ def edadeal_parser(shop,city):
     i = 1
     discounts = []
     while True:
-        print("page" + str(i))
         driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=chrome_options)
         driver.get("https://edadeal.ru/"+city+"/retailers/" + shop + "?page=" + str(i) + "&segment=beer-cider")
-        print(driver.current_url)
         html = driver.page_source
 
         soup = bs4.BeautifulSoup(html, 'html.parser')
@@ -65,7 +63,6 @@ def byProductEdadealParser(product,city):
     chrome_options.binary_location = GOOGLE_CHROME_BIN
     driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=chrome_options)
     url = "https://edadeal.ru/"+city+"/offers"
-    print(url)
     driver.get(url)
     search = driver.find_element("class name", "b-header__search-input")
     search.send_keys(product)
@@ -80,10 +77,8 @@ def byProductEdadealParser(product,city):
     finally:
         print("Page loaded")
     html = driver.page_source
-    print(html)
     soup = bs4.BeautifulSoup(html, 'html.parser')
     res = soup.findAll("a", {"class": "p-offers__offer"})
-    print(res)
     result = []
     for a in res:
         elem = {
@@ -135,4 +130,3 @@ def randomBeerParser():
     driver.close()
     print(elem)
     return elem
-
