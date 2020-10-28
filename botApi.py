@@ -299,7 +299,8 @@ def handleVote(current_chat_id):
 # FIXME [ZK]: пивобот does not follows exact order of commands
 for event in longpoll.listen():
     for event in longpoll.listen():
-        if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and ("@public" + group_id) in str(event):
+        if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and (
+                ("@public" + group_id) in str(event) or ("@club" + group_id) in str(event)):
             poll = bdApi.getPollByChatId(chat_id)
             if poll is not None and str(event.message.text[33:]) in poll.keys():
                 handleVote(chat_id)
