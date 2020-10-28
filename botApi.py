@@ -468,13 +468,13 @@ for event in longpoll.listen():
                 message = 'Город '+city+":\n"
                 if "пятерочка" in str(event):
                     products = edadeal_parser("5ka",city)
-                    message += "Скидки в пятерочке: \n"
+                    message += "🛒Скидки в пятерочке: \n"
                 elif "магнит" in str(event):
                     products = edadeal_parser("magnit-univer",city)
-                    message += "Скидки в магните: \n "
+                    message += "🛒Скидки в магните: \n "
                 elif "кб" in str(event):
                     products = edadeal_parser("krasnoeibeloe",city)
-                    message += "Скидки в кб: \n"
+                    message += "🛒Скидки в кб: \n"
                 else:
                     vk.messages.send(
                         random_id=random_id,
@@ -483,7 +483,7 @@ for event in longpoll.listen():
                     )
                     continue
                 for product in products:
-                    message += product['description'] + " \n " + product['priceNew'] + "\n "
+                    message += "🍺🍺"+product['description'] + " \n 💲💲" + product['priceNew'] + "\n "
                 vk.messages.send(
                     random_id=random_id,
                     chat_id=chat_id,
