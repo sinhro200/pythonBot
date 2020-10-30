@@ -429,6 +429,12 @@ for event in longpoll.listen():
                     chat_id=chat_id,
                     message="Конечно же ипа",
                 )
+            if "возьми жабу" in str(event):
+                vk.messages.send(
+                    random_id=random_id,
+                    chat_id=chat_id,
+                    message="взять жабу",
+                )
             if "команды" in str(event):
                 message = ("Команды бота: \n"
                            "🍻пивобот кто идет - посмотреть кто готов идти пить пиво \n"
