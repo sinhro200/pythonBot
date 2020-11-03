@@ -313,6 +313,17 @@ for event in longpoll.listen():
             if "кто идет" in str(event):
                 getPivoDrinkers(chat_id)
                 continue
+        if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and "Пиво " in str(event):
+            poll = bdApi.getPollByChatId(chat_id)
+            if poll is not None and str(event.message.text[21:]) in poll.keys():
+                handleVote(chat_id, event.message.text[21:])
+                continue
+            if "голоса инфо" in str(event):
+                showVoteInfoInDetails(chat_id)
+                continue
+            if "кто идет" in str(event):
+                getPivoDrinkers(chat_id)
+                continue
         if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and (
                 "пивобот " in str(event) or "Пивобот " in str(event)) and (event.message.text[1:7] == "ивобот"):
             random_id = random.randrange(10000, 90000)
