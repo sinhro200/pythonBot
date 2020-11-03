@@ -92,10 +92,11 @@ def byShopSort(t):
     return t['market']
 
 
-def getFavouritesDiscounts(user_id):
+def getFavouritesDiscounts(user_id,random_chat_id,current_chat_id):
     city = bdApi.getCity(user_id)
     msg = "Скидки на ваше избранное пиво в городе "+city+":\n"
     array = bdApi.getUsersFavourites(user_id)
+    i=0
     if array is None:
         return msg
     for element in array:
@@ -105,6 +106,15 @@ def getFavouritesDiscounts(user_id):
         for disount in discounts:
             msg += "\n&#12288;🍺🍺" + disount['description'] + "\n " + "&#12288;🛒🛒" + disount[
                 'market'] + "\n" + "&#12288;💲💲" + disount['priceNew'] + "\n"
+        msg=msg[:4095]
+        vk.messages.send(
+            random_id=random_id+i,
+            chat_id=current_chat_id,
+            message=msg,
+        )
+        i+=1
+        msg=""
+
     return msg
 
 
@@ -359,13 +369,7 @@ for event in longpoll.listen():
                     message=message,
                 )
             if "скидки на избранное" in str(event):
-                message = getFavouritesDiscounts(event.message.from_id)
-                message=message[:4095]
-                vk.messages.send(
-                    random_id=random_id,
-                    chat_id=chat_id,
-                    message=message,
-                )
+                 getFavouritesDiscounts(event.message.from_id,random_id,chat_id)
             if "удалить из избранного" in str(event):
                 name = event.message.text[30::]
                 message = removeFromFavourites(event.message.from_id, name)
