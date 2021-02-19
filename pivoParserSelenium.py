@@ -2,7 +2,7 @@ import bs4
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 import os
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
 import random
 import urllib.request
@@ -30,6 +30,14 @@ def edadeal_parser(shop,city):
         html = driver.page_source
 
         soup = bs4.BeautifulSoup(html, 'html.parser')
+        timeout = 1
+        try:
+            element_present = EC.presence_of_element_located(("class name", "p-retailer__offer"))
+            WebDriverWait(driver, timeout).until(element_present)
+        except TimeoutException:
+            print("Timed out waiting for page to load")
+        finally:
+            print("Page loaded")
         res = soup.findAll("a", {"class": "p-retailer__offer"})
 
         result = []
@@ -53,7 +61,7 @@ def byProductEdadealParser(product,city):
     city = city.lower()
     city = transliterator.transliterate(city)
     GOOGLE_CHROME_BIN = os.environ.get('GOOGLE_CHROME_BIN')
-    CHROMEDRIVER_PATH = os.environ.get('CHROMEDRIVER_PATH')
+    CHROMEDRIVER_PATH =os.environ.get('CHROMEDRIVER_PATH')
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument('--no-sandbox')
@@ -64,11 +72,19 @@ def byProductEdadealParser(product,city):
     driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=chrome_options)
     url = "https://edadeal.ru/"+city+"/offers"
     driver.get(url)
-    search = driver.find_element("class name", "b-header__search-input")
-    search.send_keys(product)
-    button = driver.find_element("class name", "b-button")
-    button.click()
     timeout = 1
+    try:
+        element_present = EC.presence_of_element_located(("class name", 'b-header__search-input'))
+        WebDriverWait(driver, timeout).until(element_present)
+    except TimeoutException:
+        print("Timed out waiting for page to load")
+    finally:
+        print("Page loaded")
+    search = driver.find_element_by_class_name("b-header__search-input")
+
+    search.send_keys(product)
+    button = driver.find_element_by_class_name( "b-button")
+    button.click()
     try:
         element_present = EC.presence_of_element_located(("class name", 'b-offer__description'))
         WebDriverWait(driver, timeout).until(element_present)
