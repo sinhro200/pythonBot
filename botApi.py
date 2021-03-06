@@ -54,7 +54,7 @@ def getName(id):
     last_name = last_name.split(",")[0]
     last_name = last_name[1:]
     last_name = last_name[:-1]
-    return '@id'+id+'('+first_name + " " + last_name+')'
+    return '@id'+str(id)+'('+first_name + " " + last_name+')'
 
 
 def getAll(current_chat_id):
