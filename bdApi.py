@@ -5,6 +5,9 @@ import os
 
 
 
+
+
+
 DB = str(os.environ.get('DATABASE_NAME'))
 USER =str(os.environ.get('DATABASE_USERNAME'))
 PASSWORD =str(os.environ.get('DATABASE_PASSWORD'))

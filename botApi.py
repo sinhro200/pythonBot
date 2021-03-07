@@ -529,7 +529,7 @@ for event in longpoll.listen():
                     i += 10
                     if i > length:
                         break
-            if "поздравь девушек" in str(event) && event.message.from_id=='90906069':
+            if "поздравь девушек" in str(event) and event.message.from_id=='90906069':
                 iamges = ['https://sun9-61.userapi.com/impg/ljPiE_eEH6X7o5D7rPWvjshRa2G-4m3vVYfU7w/6ocigNaJUEg.jpg?size=534x350&quality=96&sign=f3aa5f45454e1988c38594105665fb86&type=album']
                 attachments = uploadImages(images, 0, vk);
                 message="Поздравляю"
