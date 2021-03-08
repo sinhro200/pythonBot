@@ -529,12 +529,18 @@ for event in longpoll.listen():
                     i += 10
                     if i > length:
                         break
-            if "поздравь девушек" in str(event) and str(event.message.from_id) == '90906069':
+            if "ты дату видел?" in str(event) and str(event.message.from_id) == '90906069':
                 images = ['https://sun9-61.userapi.com/impg/ljPiE_eEH6X7o5D7rPWvjshRa2G-4m3vVYfU7w/6ocigNaJUEg.jpg?size=534x350&quality=96&sign=f3aa5f45454e1988c38594105665fb86&type=album']
                 attachments = uploadImages(images, 0, vk);
+                message = "А...точно"
+                vk.messages.send(
+                    random_id=random_id,
+                    chat_id=chat_id,
+                    message=message,
+                )
                 message = "Поздравляю лучших девушек лучшей группы с профессиональным праздником!Вы лучше любого пива!💖💖💖"
                 vk.messages.send(
-                    random_id=random_id ,
+                    random_id=random_id+42 ,
                     chat_id=chat_id,
                     message=message,
                     attachment=','.join(attachments)
