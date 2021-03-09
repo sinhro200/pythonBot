@@ -54,7 +54,7 @@ def getName(id):
     last_name = last_name.split(",")[0]
     last_name = last_name[1:]
     last_name = last_name[:-1]
-    return '@id'+str(id)+'('+first_name + " " + last_name+')'
+    return '@id' + str(id) + '(' + first_name + " " + last_name + ')'
 
 
 def getAll(current_chat_id):
@@ -92,28 +92,28 @@ def byShopSort(t):
     return t['market']
 
 
-def getFavouritesDiscounts(user_id,random_chat_id,current_chat_id):
+def getFavouritesDiscounts(user_id, random_chat_id, current_chat_id):
     city = bdApi.getCity(user_id)
-    msg = "Скидки на ваше избранное пиво в городе "+city+":\n"
+    msg = "Скидки на ваше избранное пиво в городе " + city + ":\n"
     array = bdApi.getUsersFavourites(user_id)
-    i=0
+    i = 0
     if array is None:
         return msg
     for element in array:
         msg += "\n⭐" + element + ":"
-        discounts = byProductEdadealParser(element,city)
+        discounts = byProductEdadealParser(element, city)
         discounts.sort(key=byShopSort)
         for disount in discounts:
             msg += "\n&#12288;🍺🍺" + disount['description'] + "\n " + "&#12288;🛒🛒" + disount[
                 'market'] + "\n" + "&#12288;💲💲" + disount['priceNew'] + "\n"
-        msg=msg[:4095]
+        msg = msg[:4095]
         vk.messages.send(
-            random_id=random_id+i,
+            random_id=random_id + i,
             chat_id=current_chat_id,
             message=msg,
         )
-        i+=1
-        msg=""
+        i += 1
+        msg = ""
 
     return msg
 
@@ -222,10 +222,31 @@ def getVoteKeyboard(current_chat_id):
 token = os.environ.get('ACCESS_TOKEN')
 # Авторизуемся как сообщество
 vk_session = vk_api.VkApi(token=token, api_version='5.124')
-group_id =os.environ.get('GROUP_ID')
+group_id = os.environ.get('GROUP_ID')
 # Работа с сообщениями
 longpoll = VkBotLongPoll(vk_session, group_id)
 vk = vk_session.get_api()
+tools = vk_api.VkTools(vk_session)
+
+
+def getPost(current_chat_id,random_id):
+    wall = tools.get_all('wall_get', 100, {'owner_id': -92876084})
+    posts_count = wall['count']
+    while True:
+        rand_post=random.randrange(1, posts_count-1)
+        wall=tools.get_all('wall_get', 2, {'owner_id': -92876084, 'offset': rand_post})
+        post = wall['items'][0]
+        if post['post_type'] == 'post'and post['text'] != '':
+            vk.messages.send(
+                random_id=random_id,
+                chat_id=current_chat_id,
+                message=post['text'],
+            )
+            return
+
+
+
+
 
 
 def showPoll(current_chat_id, poll_keyboard):
@@ -236,6 +257,7 @@ def showPoll(current_chat_id, poll_keyboard):
             chat_id=current_chat_id,
             message="Нет опроса")
     else:
+
         vk.messages.send(
             random_id=random_id,
             chat_id=current_chat_id,
@@ -275,7 +297,7 @@ def addFavourite(user_id, fav_name):
     bdApi.updateUsersFavourites(user_id, names)
 
 
-def handleVote(current_chat_id,cur_time):
+def handleVote(current_chat_id, cur_time):
     msg: str
     poll = bdApi.getPollByChatId(current_chat_id)
     if poll is None:
@@ -301,10 +323,10 @@ def handleVote(current_chat_id,cur_time):
 # FIXME [ZK]: пивобот does not follows exact order of commands
 for event in longpoll.listen():
     for event in longpoll.listen():
-        if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and  ("@public" + group_id) in str(event) :
+        if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and ("@public" + group_id) in str(event):
             poll = bdApi.getPollByChatId(chat_id)
             if poll is not None and str(event.message.text[33:]) in poll.keys():
-                handleVote(chat_id,event.message.text[33:])
+                handleVote(chat_id, event.message.text[33:])
                 continue
             if "голоса инфо" in str(event):
                 showVoteInfoInDetails(chat_id)
@@ -315,7 +337,7 @@ for event in longpoll.listen():
         if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and ("@club" + group_id) in str(event):
             poll = bdApi.getPollByChatId(chat_id)
             if poll is not None and str(event.message.text[31:]) in poll.keys():
-                handleVote(chat_id,event.message.text[31:])
+                handleVote(chat_id, event.message.text[31:])
                 continue
             if "голоса инфо" in str(event):
                 showVoteInfoInDetails(chat_id)
@@ -355,11 +377,11 @@ for event in longpoll.listen():
                 )
             if "установить город" in str(event):
                 city = event.message.text[25::]
-                bdApi.updateCity(event.message.from_id,city)
+                bdApi.updateCity(event.message.from_id, city)
                 vk.messages.send(
                     random_id=random_id,
                     chat_id=chat_id,
-                    message="Установлен город "+city,
+                    message="Установлен город " + city,
                 )
             if "показать избранное" in str(event):
                 message = getFavourites(event.message.from_id)
@@ -369,7 +391,7 @@ for event in longpoll.listen():
                     message=message,
                 )
             if "скидки на избранное" in str(event):
-                 getFavouritesDiscounts(event.message.from_id,random_id,chat_id)
+                getFavouritesDiscounts(event.message.from_id, random_id, chat_id)
             if "удалить из избранного" in str(event):
                 name = event.message.text[30::]
                 message = removeFromFavourites(event.message.from_id, name)
@@ -433,12 +455,8 @@ for event in longpoll.listen():
                     chat_id=chat_id,
                     message="Конечно же ипа",
                 )
-            if "возьми жабу" in str(event):
-                vk.messages.send(
-                    random_id=random_id,
-                    chat_id=chat_id,
-                    message="взять жабу",
-                )
+            if "отправь юмореску" in str(event):
+                getPost(chat_id,random_id)
             if "команды" in str(event):
                 message = ("Команды бота: \n"
                            "🍻пивобот кто идет - посмотреть кто готов идти пить пиво \n"
@@ -464,16 +482,16 @@ for event in longpoll.listen():
                 )
             if "едадил" in str(event):
 
-                city=bdApi.getCity(event.message.from_id)
-                message = 'Город '+city+":\n"
+                city = bdApi.getCity(event.message.from_id)
+                message = 'Город ' + city + ":\n"
                 if "пятерочка" in str(event):
-                    products = edadeal_parser("5ka",city)
+                    products = edadeal_parser("5ka", city)
                     message += "🛒Скидки в пятерочке: \n"
                 elif "магнит" in str(event):
-                    products = edadeal_parser("magnit-univer",city)
+                    products = edadeal_parser("magnit-univer", city)
                     message += "🛒Скидки в магните: \n "
                 elif "кб" in str(event):
-                    products = edadeal_parser("krasnoeibeloe",city)
+                    products = edadeal_parser("krasnoeibeloe", city)
                     message += "🛒Скидки в кб: \n"
                 else:
                     vk.messages.send(
@@ -483,7 +501,7 @@ for event in longpoll.listen():
                     )
                     continue
                 for product in products:
-                    message += "🍺🍺"+product['description'] + " \n 💲💲" + product['priceNew'] + "\n "
+                    message += "🍺🍺" + product['description'] + " \n 💲💲" + product['priceNew'] + "\n "
                 vk.messages.send(
                     random_id=random_id,
                     chat_id=chat_id,
@@ -530,7 +548,8 @@ for event in longpoll.listen():
                     if i > length:
                         break
             if "ты дату видел?" in str(event) and str(event.message.from_id) == '90906069':
-                images = ['https://sun9-61.userapi.com/impg/ljPiE_eEH6X7o5D7rPWvjshRa2G-4m3vVYfU7w/6ocigNaJUEg.jpg?size=534x350&quality=96&sign=f3aa5f45454e1988c38594105665fb86&type=album']
+                images = [
+                    'https://sun9-61.userapi.com/impg/ljPiE_eEH6X7o5D7rPWvjshRa2G-4m3vVYfU7w/6ocigNaJUEg.jpg?size=534x350&quality=96&sign=f3aa5f45454e1988c38594105665fb86&type=album']
                 attachments = uploadImages(images, 0, vk);
                 message = "А...точно"
                 vk.messages.send(
@@ -540,9 +559,8 @@ for event in longpoll.listen():
                 )
                 message = "Поздравляю лучших девушек лучшей группы с профессиональным праздником!Вы лучше любого пива!💖💖💖"
                 vk.messages.send(
-                    random_id=random_id+42 ,
+                    random_id=random_id + 42,
                     chat_id=chat_id,
                     message=message,
                     attachment=','.join(attachments)
                 )
-
