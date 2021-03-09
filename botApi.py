@@ -165,7 +165,7 @@ def whoIs(message, members):
     index = random.randrange(0, len(members) - 1)
     while members[index]["member_id"] < 0:
         index = random.randrange(0, len(members) - 1)
-    return "🤔Очевидно что " + message + " " + getName(members[index]["member_id"])
+    return "🤔Очевидно, что" + message + " " + getName(members[index]["member_id"])
 
 
 def addPollValue(value, id, current_chat_id):
