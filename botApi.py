@@ -218,48 +218,58 @@ def getVoteKeyboard(current_chat_id):
     return keyboard
 
 
-# API-ключ созданный ранее
-
-token = os.environ.get('ACCESS_TOKEN')
-service_token = os.environ.get('SERVICE_TOKEN')
-
-# Авторизуемся как сообщество
-os.environ['GROUP_ID']='199735512'
-vk_session = vk_api.VkApi(token=token, api_version='5.124')
-group_id = os.environ.get('GROUP_ID')
-# Работа с сообщениями
-longpoll = VkBotLongPoll(vk_session, group_id)
-vk = vk_session.get_api()
-
-
-def getPost(current_chat_id,random_id):
+def getPost(current_chat_id, random_id):
     data = {
         'access_token': service_token,
-        'owner_id':-92876084,
+        'owner_id': -92876084,
         'v': '5.124'}
     r = requests.get('https://api.vk.com/method/wall.get', data).json()
     count = r['response']['count']
     while True:
-        random_post = random.randrange(1,count)
+        random_post = random.randrange(1, count)
         data = {
             'access_token': service_token,
-            'owner_id':-92876084,
-            'offset':random_post,
-            'count':1,
+            'owner_id': -92876084,
+            'offset': random_post,
+            'count': 1,
             'v': '5.124'}
         r = requests.get('https://api.vk.com/method/wall.get', data).json()
-        post=r['response']['items'][0]
-        if post['post_type'] =='post' and post['text'] != '' and post['marked_as_ads']== 0:
+        post = r['response']['items'][0]
+        if post['post_type'] == 'post' and post['text'] != '' and post['marked_as_ads'] == 0:
             break
     vk.messages.send(
         random_id=random_id,
         chat_id=current_chat_id,
-        message='😂😂😂\n'+post['text'])
+        message='😂😂😂Ваша Юмореска:\n' + post['text'])
 
 
-
-
-
+def getMashup(current_chat_id, random_id):
+    data = {
+        'access_token': service_token,
+        'owner_id': -39786657,
+        'v': '5.124'}
+    r = requests.get('https://api.vk.com/method/wall.get', data).json()
+    count = r['response']['count']
+    while True:
+        random_post = random.randrange(1, count)
+        data = {
+            'access_token': service_token,
+            'owner_id': -39786657,
+            'offset': random_post,
+            'count': 1,
+            'v': '5.124'}
+        r = requests.get('https://api.vk.com/method/wall.get', data).json()
+        post = r['response']['items'][0]
+        post_mashups = list(filter(lambda attachment: attachment['type'] == 'audio', post['attachments']))
+        if post['post_type'] == 'post' and post['marked_as_ads'] == 0 and len(post_mashups) > 0:
+            break
+    single_mashup = post_mashups[0]['audio']
+    audio_attachment = 'audio{}_{}'.format(single_mashup['owner_id'], single_mashup['id'])
+    vk.messages.send(
+        random_id=random_id,
+        chat_id=current_chat_id,
+        message="🎶🎶🎶Ваш мэшап:",
+        attachment=audio_attachment)
 
 
 def showPoll(current_chat_id, poll_keyboard):
@@ -331,6 +341,19 @@ def handleVote(current_chat_id, cur_time):
         message=msg,
     )
 
+
+# API-ключ созданный ранее
+
+token = os.environ.get('ACCESS_TOKEN')
+service_token = os.environ.get('SERVICE_TOKEN')
+
+# Авторизуемся как сообщество
+os.environ['GROUP_ID'] = '199735512'
+vk_session = vk_api.VkApi(token=token, api_version='5.124')
+group_id = os.environ.get('GROUP_ID')
+# Работа с сообщениями
+longpoll = VkBotLongPoll(vk_session, group_id)
+vk = vk_session.get_api()
 
 # Основной цикл
 # FIXME [ZK]: пивобот does not follows exact order of commands
@@ -469,7 +492,9 @@ for event in longpoll.listen():
                     message="Конечно же ипа",
                 )
             if "отправь юмореску" in str(event):
-                getPost(chat_id,random_id)
+                getPost(chat_id, random_id)
+            if "отправь мэшап" in str(event):
+                getMashup(chat_id, random_id)
             if "команды" in str(event):
                 message = ("Команды бота: \n"
                            "🍻пивобот кто идет - посмотреть кто готов идти пить пиво \n"
@@ -486,7 +511,10 @@ for event in longpoll.listen():
                            "🍻пивобот удалить из избранного #навзание - убрать из избранного\n"
                            "🍻пивобот показать избранное - показать ваше избранное пиво\n"
                            "🍻пивобот скидки на избранное - скидки на ваше избранное пиво\n"
-                           "🍻пивобот случайное пиво - посоветовать случайное пиво\n")
+                           "🍻пивобот случайное пиво - посоветовать случайное пиво\n"
+                           "🍻пивобот отправь юмореску - получить случайный анек\n"
+                           "🍻пивобот отправь мэшап - получить случайный мэшап\n"
+                           )
 
                 vk.messages.send(
                     random_id=random_id,
