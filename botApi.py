@@ -219,30 +219,43 @@ def getVoteKeyboard(current_chat_id):
 
 
 # API-ключ созданный ранее
+
 token = os.environ.get('ACCESS_TOKEN')
+service_token = os.environ.get('SERVICE_TOKEN')
+
 # Авторизуемся как сообщество
+os.environ['GROUP_ID']='199735512'
 vk_session = vk_api.VkApi(token=token, api_version='5.124')
 group_id = os.environ.get('GROUP_ID')
 # Работа с сообщениями
 longpoll = VkBotLongPoll(vk_session, group_id)
 vk = vk_session.get_api()
-tools = vk_api.VkTools(vk_session)
 
 
 def getPost(current_chat_id,random_id):
-    wall = tools.get_all('wall_get', 100, {'owner_id': -92876084})
-    posts_count = wall['count']
+    data = {
+        'access_token': service_token,
+        'owner_id':-92876084,
+        'v': '5.124'}
+    r = requests.get('https://api.vk.com/method/wall.get', data).json()
+    count = r['response']['count']
     while True:
-        rand_post=random.randrange(1, posts_count-1)
-        wall=tools.get_all('wall_get', 2, {'owner_id': -92876084, 'offset': rand_post})
-        post = wall['items'][0]
-        if post['post_type'] == 'post'and post['text'] != '':
-            vk.messages.send(
-                random_id=random_id,
-                chat_id=current_chat_id,
-                message=post['text'],
-            )
-            return
+        random_post = random.randrange(1,count)
+        data = {
+            'access_token': service_token,
+            'owner_id':-92876084,
+            'offset':random_post,
+            'count':1,
+            'v': '5.124'}
+        r = requests.get('https://api.vk.com/method/wall.get', data).json()
+        post=r['response']['items'][0]
+        if post['post_type'] =='post' and post['text'] != '' and post['marked_as_ads']== 0:
+            break
+    vk.messages.send(
+        random_id=random_id,
+        chat_id=current_chat_id,
+        message='😂😂😂\n'+post['text'])
+
 
 
 
