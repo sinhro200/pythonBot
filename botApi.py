@@ -163,6 +163,7 @@ def getPollInfo(current_chat_id):
 
 def whoIs(message, members):
     index = random.randrange(0, len(members) - 1)
+    print(members)
     while members[index]["member_id"] < 0:
         index = random.randrange(0, len(members) - 1)
     return "🤔Очевидно, что" + message + " " + getName(members[index]["member_id"])
@@ -428,6 +429,7 @@ for event in longpoll.listen():
                 )
             if "скидки на избранное" in str(event):
                 getFavouritesDiscounts(event.message.from_id, random_id, chat_id)
+                continue
             if "удалить из избранного" in str(event):
                 name = event.message.text[30::]
                 message = removeFromFavourites(event.message.from_id, name)
@@ -436,16 +438,17 @@ for event in longpoll.listen():
                     chat_id=chat_id,
                     message=message,
                 )
+                continue
             if "общий сбор" in str(event):
                 vk.messages.send(
                     random_id=random_id,
                     chat_id=chat_id,
                     message=getAll(chat_id),
                 )
+                continue
             if "случайное пиво" in str(event):
                 getRandomBeerMessage(vk)
                 continue
-
             if "кто идет" in str(event):
                 getPivoDrinkers(chat_id)
                 continue
@@ -459,6 +462,7 @@ for event in longpoll.listen():
                     chat_id=chat_id,
                     message=message,
                 )
+                continue
             if 'опрос время' in str(event):
                 time = "empty"
                 try:
@@ -491,10 +495,13 @@ for event in longpoll.listen():
                     chat_id=chat_id,
                     message="Конечно же ипа",
                 )
+                continue
             if "отправь юмореску" in str(event):
                 getPost(chat_id, random_id)
+                continue
             if "отправь мэшап" in str(event):
                 getMashup(chat_id, random_id)
+                continue
             if "команды" in str(event):
                 message = ("Команды бота: \n"
                            "🍻пивобот кто идет - посмотреть кто готов идти пить пиво \n"
@@ -521,8 +528,8 @@ for event in longpoll.listen():
                     chat_id=chat_id,
                     message=message,
                 )
+                continue
             if "едадил" in str(event):
-
                 city = bdApi.getCity(event.message.from_id)
                 message = 'Город ' + city + ":\n"
                 if "пятерочка" in str(event):
@@ -548,6 +555,7 @@ for event in longpoll.listen():
                     chat_id=chat_id,
                     message=message,
                 )
+                continue
 
             if "скидкаонлайн" in str(event):
                 message = ''
@@ -588,20 +596,4 @@ for event in longpoll.listen():
                     i += 10
                     if i > length:
                         break
-            if "ты дату видел?" in str(event) and str(event.message.from_id) == '90906069':
-                images = [
-                    'https://sun9-61.userapi.com/impg/ljPiE_eEH6X7o5D7rPWvjshRa2G-4m3vVYfU7w/6ocigNaJUEg.jpg?size=534x350&quality=96&sign=f3aa5f45454e1988c38594105665fb86&type=album']
-                attachments = uploadImages(images, 0, vk);
-                message = "А...точно"
-                vk.messages.send(
-                    random_id=random_id,
-                    chat_id=chat_id,
-                    message=message,
-                )
-                message = "Поздравляю лучших девушек лучшей группы с профессиональным праздником!Вы лучше любого пива!💖💖💖"
-                vk.messages.send(
-                    random_id=random_id + 42,
-                    chat_id=chat_id,
-                    message=message,
-                    attachment=','.join(attachments)
-                )
+                continue
