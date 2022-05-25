@@ -46,6 +46,7 @@ def getName(id):
     payload = {'user_id': id, 'access_token': token, 'v': '5.124', 'lang': 1}
     response = requests.get("https://api.vk.com/method/users.get", params=payload)
     resp_keys = response.text.split(":")
+    print(resp_keys)
     first_name = resp_keys[2]
     first_name = first_name.split(",")[0]
     first_name = first_name[1:]
@@ -360,6 +361,7 @@ vk = vk_session.get_api()
 # FIXME [ZK]: пивобот does not follows exact order of commands
 for event in longpoll.listen():
     for event in longpoll.listen():
+        print(event.chat_id)
         if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and ("@public" + group_id) in str(event):
             poll = bdApi.getPollByChatId(chat_id)
             if poll is not None and str(event.message.text[33:]) in poll.keys():
