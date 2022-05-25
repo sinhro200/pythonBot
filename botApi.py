@@ -47,7 +47,7 @@ def getName(id):
     response = requests.get("https://api.vk.com/method/users.get", params=payload)
     resp_keys = response.text.split(":")
     print(resp_keys)
-    first_name = resp_keys[2]
+    first_name = resp_keys[3]
     first_name = first_name.split(",")[0]
     first_name = first_name[1:]
     first_name = first_name[:-1]
