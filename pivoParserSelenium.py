@@ -146,3 +146,4 @@ def randomBeerParser():
     driver.close()
     print(elem)
     return elem
+
