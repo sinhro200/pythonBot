@@ -387,6 +387,8 @@ for event in longpoll.listen():
                 continue
         if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and (
                 "пивобот " in str(event) or "Пивобот " in str(event)) and (event.message.text[1:7] == "ивобот"):
+            print(event.from_user)
+            print(event)
             random_id = random.randrange(10000, 90000)
             chat_id = int(event.chat_id)
             if "опрос показать" in str(event):
