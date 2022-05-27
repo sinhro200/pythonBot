@@ -393,7 +393,7 @@ for event in longpoll.listen():
                 vk.messages.send(
                     random_id=random_id,
                     chat_id=chat_id,
-                    message="Кирилл пошел нахуй)",
+                    message="Кирилл ты очень хороший человек и тебя все любят<3",
                 )
                 continue
             if "опрос показать" in str(event):
