@@ -164,10 +164,10 @@ def getPollInfo(current_chat_id):
 
 
 def whoIs(message, members):
-    index = random.randrange(0, len(members) - 1)
+    index = random.randrange(0, len(members))
     print(members)
     while members[index]["member_id"] < 0:
-        index = random.randrange(0, len(members) - 1)
+        index = random.randrange(0, len(members))
     return "🤔Очевидно, что" + message + " " + getName(members[index]["member_id"])
 
 
