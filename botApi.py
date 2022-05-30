@@ -389,13 +389,6 @@ for event in longpoll.listen():
                 "пивобот " in str(event) or "Пивобот " in str(event)) and (event.message.text[1:7] == "ивобот"):
             random_id = random.randrange(10000, 90000)
             chat_id = int(event.chat_id)
-            if event.message.from_id == 136122065:
-                vk.messages.send(
-                    random_id=random_id,
-                    chat_id=chat_id,
-                    message="Кирилл ты очень хороший человек и тебя все любят<3",
-                )
-                continue
             if "опрос показать" in str(event):
                 keyboard = getVoteKeyboard(chat_id)
                 if keyboard is None:
