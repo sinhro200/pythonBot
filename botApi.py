@@ -6,10 +6,12 @@ from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 
 import bdApi
+from bredogenerator.textGeneratorWorker import TextGeneratorWorker
 from pivoParser import parsePyaterochka, parseMagnit, parseKb
 from pivoParserSelenium import *
 from PIL import ImageFont, ImageDraw, Image
 
+textGenerator = TextGeneratorWorker()
 
 def cv2_images(text):
     # Write some Text
@@ -532,6 +534,18 @@ for event in longpoll.listen():
                 continue
             if "отправь юмореску" in str(event):
                 getPost(chat_id, random_id)
+                continue
+            if "продолжи" in str(event):
+                textGenerator.generateDefault(event.message.text[16:])
+                continue
+            if "ппродолжи" in str(event):
+                textGenerator.generate_pelevin(event.message.text[17:])
+                continue
+            if "спродолжи" in str(event):
+                textGenerator.generate_sber(event.message.text[17:])
+                continue
+            if "сбпродолжи" in str(event):
+                textGenerator.generate_sberLarge(event.message.text[17:])
                 continue
             if "отправь мэшап" in str(event):
                 getMashup(chat_id, random_id)
