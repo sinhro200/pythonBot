@@ -4,7 +4,6 @@ import numpy as np
 
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
-from cv2 import cv2
 
 import bdApi
 from pivoParser import parsePyaterochka, parseMagnit, parseKb
@@ -13,23 +12,20 @@ from PIL import ImageFont, ImageDraw, Image
 
 
 def cv2_images(text):
-    img = cv2.imread('img.png')
     # Write some Text
 
     r, g, b, a = 181, 222, 77, 1
     font = ImageFont.truetype("font.ttf", 55)
-    img_pil = Image.fromarray(img)
+    img_pil = Image.open("img.png")
     draw = ImageDraw.Draw(img_pil)
 
     draw.text((img_pil.size[0] / 4, img_pil.size[1] / 10), text, font=font, fill=(b, g, r, a))
-    img = np.array(img_pil)
-
-    cv2.imwrite("out.jpg", img)
+    img_pil.save('out.png')
 
 
 def uploadImage(vk_session):
     upload = vk_api.VkUpload(vk_session)
-    photo = upload.photo_messages('out.jpg')[0]
+    photo = upload.photo_messages('out.png')[0]
     return 'photo{}_{}_{}'.format(photo['owner_id'], photo['id'], photo['access_key'])
 
 
