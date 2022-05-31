@@ -1,25 +1,38 @@
 import requests
 import vk_api
-import numpy as np
-
+from PIL import ImageFont, ImageDraw, Image
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 
 import bdApi
+from imgApi import searchImages, getImageData
 from pivoParser import parsePyaterochka, parseMagnit, parseKb
 from pivoParserSelenium import *
-from PIL import ImageFont, ImageDraw, Image
 
 
 def cv2_images(text):
     # Write some Text
-
+    query = text[7:]
     r, g, b, a = 181, 222, 77, 1
     font = ImageFont.truetype("font.ttf", 55)
+
     img_pil = Image.open("img.png")
     draw = ImageDraw.Draw(img_pil)
+    new_img_size = img_pil.size[0] / 4, img_pil.size[1] / 4
+
+    images = searchImages(query)
+
+    for i in range(4):
+        try:
+            image_data = getImageData(images[i])
+            new_image = Image.open(image_data)
+            new_image.thumbnail(new_img_size, Image.ANTIALIAS)
+            img_pil.paste(new_image, (int(i * (new_img_size[0] + 50)), int(img_pil.size[1] - new_img_size[1])))
+        except:
+            print("Error fetching image with url:" + images[i])
 
     draw.text((img_pil.size[0] / 4, img_pil.size[1] / 10), text, font=font, fill=(b, g, r, a))
+
     img_pil.save('out.png')
 
 
