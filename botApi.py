@@ -1,11 +1,36 @@
-import random
 import requests
 import vk_api
+import numpy as np
+
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
+from cv2 import cv2
+
 import bdApi
 from pivoParser import parsePyaterochka, parseMagnit, parseKb
 from pivoParserSelenium import *
+from PIL import ImageFont, ImageDraw, Image
+
+
+def cv2_images(text):
+    img = cv2.imread('img.png')
+    # Write some Text
+
+    r, g, b, a = 181, 222, 77, 1
+    font = ImageFont.truetype("font.ttf", 55)
+    img_pil = Image.fromarray(img)
+    draw = ImageDraw.Draw(img_pil)
+
+    draw.text((img_pil.size[0] / 4, img_pil.size[1] / 10), text, font=font, fill=(b, g, r, a))
+    img = np.array(img_pil)
+
+    cv2.imwrite("out.jpg", img)
+
+
+def uploadImage(vk_session):
+    upload = vk_api.VkUpload(vk_session)
+    photo = upload.photo_messages('out.jpg')[0]
+    return 'photo{}_{}_{}'.format(photo['owner_id'], photo['id'], photo['access_key'])
 
 
 def uploadImages(images, offset, vk_session):
@@ -492,6 +517,16 @@ for event in longpoll.listen():
             if "голоса инфо" in str(event):
                 showVoteInfoInDetails(chat_id)
                 continue
+            if "поздравь с" in str(event):
+                msg = event.message.text[17:]
+                cv2_images(msg)
+                attachment = uploadImage(vk)
+                vk.messages.send(
+                    random_id=random_id,
+                    chat_id=chat_id,
+                    message=" ",
+                    attachment=attachment
+                )
             if "лучшее пиво" in str(event):
                 vk.messages.send(
                     random_id=random_id,
